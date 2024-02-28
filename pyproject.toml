@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "sigmazerosearch"
+version = "0.1.0"
+description = ""
+authors = ["Niam Patel <naz1997@googlemail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+matplotlib = "^3.8.2"
+pandas = "^2.1.4"
+polars = {extras = ["numpy", "pandas", "plot"], version = "^0.20.4"}
+numpy = "^1.26.3"
+scipy = "^1.11.4"
+uproot = "^5.2.1"
+mplhep = "^0.3.31"
+awkward-pandas = "^2023.8.0"
+awkward = "^2.5.2"
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.21.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
