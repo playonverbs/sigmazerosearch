@@ -1,11 +1,14 @@
 import uproot as up
 import awkward as aw
 from uproot.behaviors.TBranch import HasBranches
+from os.path import isabs
 
 
 def load_ntuple(filename: str) -> HasBranches:
     """wraps the uproot.open method, taking a filename and outputting some ROOT object that has branches"""
     data = up.open(filename)
+    if not isabs(filename):
+        raise OSError("Please provide an absolute file path")
     if isinstance(data, HasBranches):
         return data
     else:
@@ -14,9 +17,8 @@ def load_ntuple(filename: str) -> HasBranches:
 
 def get_POT(filename: str):
     """sums the POT value of each subrun from a"""
+    if not isabs(filename):
+        raise OSError("Please provide an absolute file path")
     data = up.open(filename)
     pots_per_subrun: aw.Array = data.get("ana/MetaTree").get("POT").array()  # type: ignore
-    try:
-        return aw.sum(pots_per_subrun)
-    except:
-        return -1.0
+    return aw.sum(pots_per_subrun)
