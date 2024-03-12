@@ -104,18 +104,21 @@ class Sample:
         return True
 
 
-SampleSet = list[Sample]
+class SampleSet(list[Sample]):
+    def __init__(self, *samples, **kwargs):
+        super().__init__(samples)
+        # self.base_dir: str = kwargs["base_dir"] if kwargs["base_dir"] else "."
 
 
 class Selection:
-    parameters: ParameterSet
-    samples: SampleSet
-    cuts: list[Cut]
+    # parameters: ParameterSet
+    # samples: SampleSet
+    # cuts: list[Cut]
 
     def __init__(self, **kwargs):
-        self.parameters = ParameterSet()
-        self.samples = SampleSet()
-        self.cuts = []
+        self.parameters: ParameterSet = ParameterSet(kwargs["params"])
+        self.samples: SampleSet = kwargs["samples"]
+        self.cuts: list[Cut] = kwargs["cuts"]
 
     @classmethod
     def empty(cls):
