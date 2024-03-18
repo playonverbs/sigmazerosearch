@@ -1,17 +1,27 @@
 from enum import Enum
 import matplotlib.pyplot as plt
 
-# import pandas as pd
-import polars as pl
+import awkward as ak
+from uproot.behaviors.TBranch import HasBranches
 import sigmazerosearch.utils as utils
 from sigmazerosearch.types.truth import GenType
-from sigmazerosearch.loader.loader import get_POT
+from sigmazerosearch.loader.loader import get_POT, load_ntuple
+
+from os.path import isabs
 
 """
 ValueUnc represents a central value with either a symmetric or (upper,
-lower) associated error
+lower) associated error.
 """
 ValueUnc = tuple[float, float] | tuple[float, float, float]
+
+BRANCH_LIST = [
+    "InActiveTPC",
+    "IsSignalSigmaZero",
+    "NPrimaryTrackDaughters",
+    "NPrimaryShowerDaughters",
+    "RecoPrimaryVertex",
+]
 
 
 class Cut:
@@ -68,8 +78,7 @@ class Sample:
     POT: float
     gen_type: GenType
     is_data: bool
-    # df: pd.DataFrame | None = None
-    df: pl.DataFrame | pl.LazyFrame | None = None
+    df: HasBranches | None = None
 
     def __init__(
         self,
@@ -89,10 +98,11 @@ class Sample:
     def from_dict(cls, kv: dict):
         return cls(kv["name"], kv["file_name"], kv["type"], kv["POT"])
 
-    async def load_df(self):
+    def load_df(self):
         """read file_name into a pandas dataframe"""
-        # self.df = pd.read_csv(self.file_name)
-        self.df = pl.scan_csv(self.file_name)
+        if not isabs(self.file_name):
+            raise OSError
+        self.df = load_ntuple(self.file_name + ":ana/OutputTree")
 
     def _validate_(self) -> bool:
         if self.POT < 0:
@@ -135,8 +145,8 @@ class Selection:
             if cut.name != cutname:
                 continue
             for s in self.samples:
-                if isinstance(s.df, pl.DataFrame):
-                    s.df[cut.cutexpr]
+                if isinstance(s.df, HasBranches):
+                    this_df = s.df.arrays(BRANCH_LIST, cut.cutexpr)
                 else:
                     raise TypeError(f"sample {s.file_name} has not been loaded")
 
@@ -161,6 +171,19 @@ class Selection:
                 return False
 
         return True
+
+    def open_files(self) -> None:
+        """load all samples into dataframes asynchronously (for now)"""
+        for sample in self.samples:
+            sample.load_df()
+
+    def close_files(self) -> None:
+        """
+        delete dataframe objects from memory, to be run after IO operations
+        have been run on samples
+        """
+        for s in self.samples:
+            del s.df  # NOTE: maybe naive; refactor when final DataFrame chosen
 
     # def to_latex(self) -> str:
     #     """output selection details to a latex table"""
