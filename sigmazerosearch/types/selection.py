@@ -41,9 +41,10 @@ class Cut:
     n_passing: ValueUnc
     n_background: ValueUnc
 
-    def __init__(self, name: str, cutexpr: str):
+    def __init__(self, name: str, cutexpr: str, cutfunc):
         self.name: str = name
         self.cutexpr: str = cutexpr
+        self.cutfunc: Callable[[ak.Array], ak.Array] = cutfunc
         self.n_passing: ValueUnc = (0.0, 0.0, 0.0)
         self.n_signal: ValueUnc = (0.0, 0.0, 0.0)
         self.n_background: ValueUnc = (0.0, 0.0, 0.0)
@@ -51,7 +52,7 @@ class Cut:
 
     def eff(self) -> float:
         """Calculate the selection efficiency at the current Cut"""
-        return -1.0
+        return self.n_signal[0] / self.n_passing[0]
 
     def pur(self) -> float:
         """Calculate the selection purity at the current Cut"""
@@ -151,12 +152,20 @@ class Selection:
         return out
 
     def apply_cut(self, cutname: str):
-        for cut in self.cuts:
+        for i, cut in enumerate(self.cuts):
             if cut.name != cutname:
                 continue
             for s in self.samples:
                 if isinstance(s.df, HasBranches):
-                    this_df = s.df.arrays(BRANCH_LIST, cut.cutexpr)
+                    arr = s.df.arrays(BRANCH_LIST)
+                    cond = np.logical_and.reduce(
+                        [c.cutfunc(arr) for c in self.cuts[: i + 1]]
+                    )
+                    arr = arr[cond]
+                    cut.n_signal = (ak.sum(signal_def(arr), axis=None), 0, 0)  # type: ignore
+                    cut.n_background = (ak.sum(~signal_def(arr), axis=None), 0, 0)  # type: ignore
+                    cut.n_passing = (ak.sum(cond, axis=None), 0, 0)  # type: ignore
+                    cut.applied = True
                 else:
                     raise TypeError(f"sample {s.file_name} has not been loaded")
 
