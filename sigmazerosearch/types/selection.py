@@ -52,11 +52,11 @@ class Cut:
 
     def eff(self) -> float:
         """Calculate the selection efficiency at the current Cut"""
-        return self.n_signal[0] / self.n_passing[0]
+        return -1.0
 
     def pur(self) -> float:
         """Calculate the selection purity at the current Cut"""
-        return -1.0
+        return self.n_signal[0] / self.n_passing[0]
 
     def _validate_(self) -> bool:
         """validate the cut data"""
@@ -211,7 +211,17 @@ class Selection:
     #         out += f"{c.name} & {c.n_passing[0]} &"
     #     return out
 
-    # def cut_summary(self):
-    #     # for cut in self.cuts:
-    #     #     for item in zip(cut.n_signal, cut.n_passing, cut.n_background):
-    #     #         item[0]
+    def cut_summary(self, header: bool = False, format: str = "text"):
+        # maxes = np.max([len(cut.name) for cut in self.cuts])
+        row = "{:<20} {:>10} {:>10} {:>10} {:>10}"
+        if not format in ["csv", "text", "latex"]:
+            raise TypeError('''format must be one of "csv", "text", "latex"''')
+
+        if header:
+            print(row.format("Cut name", "Signal", "Background", "Eff.", "Pur."))
+        for cut in self.cuts:
+            print(
+                row.format(
+                    cut.name, cut.n_signal[0], cut.n_background[0], cut.eff(), cut.pur()
+                )
+            )
