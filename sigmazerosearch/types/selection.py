@@ -2,12 +2,15 @@ from enum import Enum
 import matplotlib.pyplot as plt
 
 import awkward as ak
+import numpy as np
 from uproot.behaviors.TBranch import HasBranches
 import sigmazerosearch.utils as utils
 from sigmazerosearch.types.truth import GenType
+from sigmazerosearch.types.general import PDG
 from sigmazerosearch.loader.loader import get_POT, load_ntuple
 
 from os.path import isabs
+from typing import Callable
 
 """
 ValueUnc represents a central value with either a symmetric or (upper,
@@ -15,13 +18,20 @@ lower) associated error.
 """
 ValueUnc = tuple[float, float] | tuple[float, float, float]
 
-BRANCH_LIST = [
-    "InActiveTPC",
-    "IsSignalSigmaZero",
-    "NPrimaryTrackDaughters",
-    "NPrimaryShowerDaughters",
-    "RecoPrimaryVertex",
-]
+BRANCH_LIST = None
+# BRANCH_LIST = [
+#     "reco_primary_vtx_inFV" "mc_hyperon_pdg" "pfp_true_pdg" "NPrimaryTrackDaughters",
+#     "NPrimaryShowerDaughters",
+#     "RecoPrimaryVertex",
+# ]
+
+
+def signal_def(arr: ak.Array) -> ak.Array:
+    """takes an awkward.Array with fields corresponding to ntuple branches,
+    applies a mask and returns a boolean array"""
+    return np.logical_and.reduce(
+        (arr["mc_nu_pdg"] == PDG.NuMu.anti, arr["mc_hyperon_pdg"] == PDG.Sigma0.value)
+    )  # type: ignore
 
 
 class Cut:
