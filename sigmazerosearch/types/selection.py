@@ -37,6 +37,7 @@ def signal_def(arr: ak.Array) -> ak.Array:
 class Cut:
     """Cut represents a single selection cut and the selection state for it."""
 
+    total_signal = 0.0
     n_signal: ValueUnc
     n_passing: ValueUnc
     n_background: ValueUnc
@@ -52,7 +53,7 @@ class Cut:
 
     def eff(self) -> float:
         """Calculate the selection efficiency at the current Cut"""
-        return -1.0
+        return self.n_signal[0] / self.total_signal
 
     def pur(self) -> float:
         """Calculate the selection purity at the current Cut"""
@@ -158,6 +159,8 @@ class Selection:
             for s in self.samples:
                 if isinstance(s.df, HasBranches):
                     arr = s.df.arrays(BRANCH_LIST)
+                    if Cut.total_signal == 0.0:
+                        Cut.total_signal = ak.sum(signal_def(arr), axis=None)  # type: ignore
                     cond = np.logical_and.reduce(
                         [c.cutfunc(arr) for c in self.cuts[: i + 1]]
                     )
@@ -214,7 +217,7 @@ class Selection:
     def cut_summary(self, header: bool = False, format: str = "text"):
         # maxes = np.max([len(cut.name) for cut in self.cuts])
         row = "{:<20} {:>10} {:>10} {:>10} {:>10}"
-        if not format in ["csv", "text", "latex"]:
+        if format not in ["csv", "text", "latex"]:
             raise TypeError('''format must be one of "csv", "text", "latex"''')
 
         if header:
