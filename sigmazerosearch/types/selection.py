@@ -172,15 +172,27 @@ class Selection:
                 else:
                     raise TypeError(f"sample {s.file_name} has not been loaded")
 
-    def plot_eff_pur(self) -> None:
+    def plot_eff_pur(self, exp: bool = False) -> None:
         """plot progressive change in selection purity and efficiency"""
         names: list[str] = [c.name for c in self.cuts]
         effs: list[float] = [c.eff() for c in self.cuts]
         purs: list[float] = [c.pur() for c in self.cuts]
 
-        plt.scatter(names, effs, label="efficiency")
-        plt.scatter(names, purs, label="purity")
-        plt.show()
+        fig, ax = plt.subplots()
+        if exp:
+            ax.set_ylabel(r"$\epsilon p$")
+            ax.scatter(names, [e * p for e, p in zip(effs, purs)], label="eff * pur")
+            fig.tight_layout()
+            plt.show()
+        else:
+            e = ax.scatter(names, effs, label="efficiency", color="tab:blue")
+            ax2 = ax.twinx()
+            p = ax2.scatter(names, purs, label="purity", color="tab:orange")
+            ax.set_ylabel("Efficiency")
+            ax2.set_ylabel("Purity")
+            ax2.legend([e, p], ["Eff.", "Pur."])
+            fig.tight_layout()
+            plt.show()
 
     def sample_types(self) -> list[SampleType | None]:
         """list types of all assoc samples"""
