@@ -5,6 +5,7 @@ import awkward as ak
 import numpy as np
 from uproot.behaviors.TBranch import HasBranches
 import sigmazerosearch.utils as utils
+import sigmazerosearch.alg.fv as fv
 from sigmazerosearch.types.truth import GenType
 from sigmazerosearch.types.general import PDG
 from sigmazerosearch.loader.loader import get_POT, load_ntuple
@@ -30,7 +31,13 @@ def signal_def(arr: ak.Array) -> ak.Array:
     """takes an awkward.Array with fields corresponding to ntuple branches,
     applies a mask and returns a boolean array"""
     return np.logical_and.reduce(
-        (arr["mc_nu_pdg"] == PDG.NuMu.anti, arr["mc_hyperon_pdg"] == PDG.Sigma0.value)
+        (
+            arr["mc_nu_pdg"] == PDG.NuMu.anti,
+            arr["mc_hyperon_pdg"] == PDG.Sigma0.value,
+            fv.in_active_tpc(
+                arr["mc_nu_pos_x"], arr["mc_nu_pos_y"], arr["mc_nu_pos_z"]
+            ),
+        )
     )  # type: ignore
 
 
