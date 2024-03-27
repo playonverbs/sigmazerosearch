@@ -49,9 +49,8 @@ class Cut:
     n_passing: ValueUnc
     n_background: ValueUnc
 
-    def __init__(self, name: str, cutexpr: str, cutfunc):
+    def __init__(self, name: str, cutfunc):
         self.name: str = name
-        self.cutexpr: str = cutexpr
         self.cutfunc: Callable[[ak.Array], ak.Array] = cutfunc
         self.n_passing: ValueUnc = (0.0, 0.0, 0.0)
         self.n_signal: ValueUnc = (0.0, 0.0, 0.0)
