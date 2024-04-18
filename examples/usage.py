@@ -5,9 +5,11 @@ from sigmazerosearch.types.selection import (
     Sample,
     SampleSet,
     SampleType,
+    ParameterSet,
 )
 import awkward as ak
 
+pset = ParameterSet({"pid_cut": 0.6, "min_length": 10, "max_separation": 1})
 
 sel = Selection(
     cuts=[
@@ -36,7 +38,7 @@ sel = Selection(
         ),
         base_dir="/home/niam/phd/data/hyperons/run3b_RHC",
     ),
-    params=[2.0],
+    params=pset,
 )
 
 

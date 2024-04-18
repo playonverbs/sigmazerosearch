@@ -73,8 +73,9 @@ class Cut:
         return True
 
 
-# TODO: assign to real type representing a set of parameters
-ParameterSet = list[float]  # STUB
+# TODO: assign to real type representing a set of parameters, gets passed into
+# functions that require a tweakable parameters
+ParameterSet = dict[str, bool | float | int]  # STUB
 
 
 class SampleType(Enum):
