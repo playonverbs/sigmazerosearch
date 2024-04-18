@@ -7,6 +7,7 @@ from sigmazerosearch.types.selection import (
     SampleType,
     ParameterSet,
 )
+from sigmazerosearch.alg.muon import select_mu_candidate
 import awkward as ak
 
 pset = ParameterSet({"pid_cut": 0.6, "min_length": 10, "max_separation": 1})
@@ -25,7 +26,10 @@ sel = Selection(
             "showers",
             lambda arr: ak.sum(arr["pfp_trk_shr_score"] < 0.5, axis=1) >= 1,
         ),
-        # Cut("muon-id", "..."),
+        Cut(
+            "muon-id",
+            lambda arr: ak.sum(select_mu_candidate(arr, pset), axis=1) >= 1,
+        ),
         # Cut("lambda-analysis", "LambdaBDT > 0.4"),
         # Cut("photon-bdt", "PhotonBDT > 0.2"),
     ],
