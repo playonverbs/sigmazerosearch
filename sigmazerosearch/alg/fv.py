@@ -1,4 +1,3 @@
-import awkward as ak
 import numpy as np
 
 __all__ = ["in_active_tpc"]
