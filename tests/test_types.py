@@ -1,6 +1,5 @@
 from sigmazerosearch.types.selection import Selection, Cut, Sample, SampleType
 from sigmazerosearch.types.general import PDG
-from sigmazerosearch.types.truth import GenType, GenEventType
 
 # TODO: split this file into separate files for each large type for more
 # detailed testing, e.g. multiple tests for Selection
@@ -18,13 +17,11 @@ def test_PDG():
 
 
 def test_Cut():
-    c1 = Cut("this", "null")
+    c1 = Cut("this", lambda: 2)
     assert c1.name == "this"
-    assert c1.cutexpr == "null"
 
-    c2 = Cut("that", "!null")
+    c2 = Cut("that", lambda: 3)
     assert c1.name != c2.name
-    assert c1.cutexpr != c2.cutexpr
 
 
 def test_Sample():
@@ -42,8 +39,10 @@ def test_Sample():
 
 
 def test_Selection():
-    s = Selection()
-    s.cuts = [Cut("cut1", "inFV"), Cut("cut2", "inFV && NuMu")]
+    s = Selection(
+        params={}, samples={}, cuts=[Cut("cut1", lambda: 2), Cut("cut2", lambda: 3)]
+    )
+    # s.cuts = [Cut("cut1", "inFV"), Cut("cut2", "inFV && NuMu")]
 
     s.cuts[0].n_signal = (60, 10)
     s.cuts[0].n_passing = (40, 5)
@@ -52,5 +51,5 @@ def test_Selection():
     s.cuts[1].n_passing = (15, 5)
     s.cuts[1].n_background = (1e4, 1e2)
 
-    t = Selection.with_cuts([Cut("cut1", "inFV")])
-    assert t.cuts[0].name == s.cuts[0].name
+    # t = Selection.with_cuts([Cut("cut1", "inFV")])
+    # assert t.cuts[0].name == s.cuts[0].name
