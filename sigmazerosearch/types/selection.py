@@ -49,7 +49,7 @@ class Cut:
     n_passing: ValueUnc
     n_background: ValueUnc
 
-    def __init__(self, name: str, cutfunc):
+    def __init__(self, name: str, cutfunc: Callable):
         self.name: str = name
         self.cutfunc: Callable[[ak.Array], ak.Array] = cutfunc
         self.n_passing: ValueUnc = (0.0, 0.0, 0.0)
