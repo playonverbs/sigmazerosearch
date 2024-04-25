@@ -53,11 +53,17 @@ def main():
     sel.open_files()
 
     for sam in sel.samples:
-        print(sam.file_name.split("/")[-1], sam.type, sam.POT)
+        print(sam.file_name.split("/")[-1], sam.type.name, sam.POT)
+
+    print()
+    sel.plot_reco_effs()
+
     for n, cut in enumerate(sel.cuts):
         print(f"Applying {n}. {cut.name} Cut\t", end="", flush=True)
         sel.apply_cut(cut.name)
         print("...Applied cut")
+
+    print()
 
     sel.cut_summary(header=True)
     sel.plot_eff_pur()

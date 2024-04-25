@@ -160,6 +160,11 @@ class Selection:
         return out
 
     def apply_cut(self, cutname: str):
+        """
+        Apply a given selection cut's cut function to the sample arrays and
+        accumulates the resulting number of signal, background and total
+        passing particles per cut.
+        """
         for i, cut in enumerate(self.cuts):
             if cut.name != cutname:
                 continue
@@ -215,6 +220,7 @@ class Selection:
         purs: list[float] = [c.pur() for c in self.cuts]
 
         fig, ax = plt.subplots()
+        ax.set_title("Selection Performance", loc="right", color="grey", weight="bold")
         if exp:
             ax.set_ylabel(r"$\epsilon p$")
             ax.scatter(names, [e * p for e, p in zip(effs, purs)], label="eff * pur")
