@@ -179,6 +179,35 @@ class Selection:
                 else:
                     raise TypeError(f"sample {s.file_name} has not been loaded")
 
+    def plot_reco_effs(self, signal=True) -> None:
+        pdgs = [PDG.Photon.value, PDG.Proton.value, PDG.Pi.anti, PDG.Muon.anti]
+        lost = []
+        counted = []
+        # TODO: fix for multiple samples
+
+        for s in self.samples:
+            if isinstance(s.df, HasBranches):
+                arr = s.df.arrays(BRANCH_LIST)
+                for pdg in pdgs:
+                    cond = ak.sum(arr["pfp_true_pdg"] == pdg, axis=1) >= 1  # type: ignore
+                    if signal:
+                        counted.append(len(arr[signal_def(arr[cond])]))
+                        lost.append(len(arr[signal_def(arr[~cond])]))
+                    else:
+                        counted.append(len(arr[cond]))
+                        lost.append(len(arr[~cond]))
+
+        labels = [r"$\gamma$", r"$p$", r"$\pi^-$", r"$\mu^+$"]
+
+        fig, ax = plt.subplots()
+        ax.set_title("Reco. Efficiency", loc="right", color="grey", weight="bold")
+        ax.set_ylabel("# Events with Particles")
+        ax.bar(labels, counted, label="found", bottom=[0, 0, 0, 0])
+        ax.bar(labels, lost, label="lost", bottom=counted)
+        ax.legend()
+        fig.tight_layout()
+        plt.show()
+
     def plot_eff_pur(self, exp: bool = False) -> None:
         """plot progressive change in selection purity and efficiency"""
         names: list[str] = [c.name for c in self.cuts]
