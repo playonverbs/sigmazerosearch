@@ -235,12 +235,13 @@ class Selection:
 
     def cut_summary(self, header: bool = False, format: str = "text"):
         # maxes = np.max([len(cut.name) for cut in self.cuts])
-        row = "{:<20} {:>10} {:>10} {:>10} {:>10}"
+        header_row = "{:<20} {:>10} {:>10} {:>10} {:>10}"
+        row = "{:<20} {:>10} {:>10} {:>10.5f} {:>10.5f}"
         if format not in ["csv", "text", "latex"]:
             raise TypeError('''format must be one of "csv", "text", "latex"''')
 
         if header:
-            print(row.format("Cut name", "Signal", "Background", "Eff.", "Pur."))
+            print(header_row.format("Cut name", "Signal", "Background", "Eff.", "Pur."))
         for cut in self.cuts:
             print(
                 row.format(
