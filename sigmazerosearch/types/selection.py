@@ -236,6 +236,49 @@ class Selection:
             fig.tight_layout()
             plt.show()
 
+    def plot_slice_info(self, type="both", signal=True) -> None:
+        if type not in ["both", "purity", "completeness"]:
+            raise TypeError(
+                '''type must be one of "purity", "completeness" or "both"'''
+            )
+
+        fig, ax = plt.subplots(tight_layout=True)
+
+        arr = self.samples[0].df.arrays(BRANCH_LIST)
+
+        cond = signal_def(arr) if signal else True
+
+        if type == "both":
+            ax.set_xlabel(r"True $\nu$ slice completeness")
+            ax.set_ylabel(r"True $\nu$ slice purity")
+            h2 = ax.hist2d(
+                arr["true_nu_slice_completeness"][
+                    (arr["true_nu_slice_completeness"] != -999) & cond
+                ].to_numpy(),
+                arr["true_nu_slice_purity"][
+                    (arr["true_nu_slice_purity"] != -999) & cond
+                ].to_numpy(),
+            )
+            fig.colorbar(h2[3], ax=ax, label="Number of Slices")
+        elif type == "purity":
+            ax.set_xlabel(r"True $\nu$ slice purity")
+            ax.hist(
+                arr["true_nu_slice_completeness"][
+                    (arr["true_nu_slice_completeness"] != -999) & cond
+                ].to_numpy(),
+                histtype="step",
+            )
+        elif type == "completeness":
+            ax.set_xlabel(r"True $\nu$ slice completeness")
+            ax.hist(
+                arr["true_nu_slice_completeness"][
+                    (arr["true_nu_slice_completeness"] != -999) & cond
+                ].to_numpy(),
+                histtype="step",
+            )
+
+        plt.show()
+
     def sample_types(self) -> list[SampleType | None]:
         """list types of all assoc samples"""
         return [sample.type for sample in self.samples]
