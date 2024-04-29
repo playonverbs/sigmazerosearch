@@ -312,17 +312,63 @@ class Selection:
     #     return out
 
     def cut_summary(self, header: bool = False, format: str = "text"):
-        # maxes = np.max([len(cut.name) for cut in self.cuts])
-        header_row = "{:<20} {:>10} {:>10} {:>10} {:>10}"
-        row = "{:<20} {:>10} {:>10} {:>10.5f} {:>10.5f}"
         if format not in ["csv", "text", "latex"]:
             raise TypeError('''format must be one of "csv", "text", "latex"''')
 
-        if header:
-            print(header_row.format("Cut name", "Signal", "Background", "Eff.", "Pur."))
-        for cut in self.cuts:
-            print(
-                row.format(
-                    cut.name, cut.n_signal[0], cut.n_background[0], cut.eff(), cut.pur()
+        if format == "text":
+            header_row = "{:<20} {:>10} {:>10} {:>10} {:>10}"
+            row = "{:<20} {:>10} {:>10} {:>10.5f} {:>10.5f}"
+            if header:
+                print(
+                    header_row.format(
+                        "Cut name", "Signal", "Background", "Eff.", "Pur."
+                    )
                 )
-            )
+            for cut in self.cuts:
+                print(
+                    row.format(
+                        cut.name,
+                        cut.n_signal[0],
+                        cut.n_background[0],
+                        cut.eff(),
+                        cut.pur(),
+                    )
+                )
+        elif format == "csv":
+            header_row = "{:<},{:>},{:>},{:>},{:>}"
+            row = "{:<},{:>},{:>},{:>.5f},{:>.5f}"
+            if header:
+                print(
+                    header_row.format(
+                        "Cut name", "Signal", "Background", "Eff.", "Pur."
+                    )
+                )
+            for cut in self.cuts:
+                print(
+                    row.format(
+                        cut.name,
+                        cut.n_signal[0],
+                        cut.n_background[0],
+                        cut.eff(),
+                        cut.pur(),
+                    )
+                )
+        elif format == "latex":
+            header_row = "{:<20} & {:>10} & {:>10} & {:>10} & {:>10} \\"
+            row = "{:<20} &  ${:>10}$ &  ${:>10}$ & ${:>10.5f}$ & ${:>10.5f}$ \\"
+            if header:
+                print(
+                    header_row.format(
+                        "Cut name", "Signal", "Background", "Eff.", "Pur."
+                    )
+                )
+            for cut in self.cuts:
+                print(
+                    row.format(
+                        cut.name,
+                        cut.n_signal[0],
+                        cut.n_background[0],
+                        cut.eff(),
+                        cut.pur(),
+                    )
+                )
