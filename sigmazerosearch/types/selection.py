@@ -223,16 +223,23 @@ class Selection:
         ax.set_title("Selection Performance", loc="right", color="grey", weight="bold")
         if exp:
             ax.set_ylabel(r"$\epsilon p$")
-            ax.scatter(names, [e * p for e, p in zip(effs, purs)], label="eff * pur")
+            ax.plot(
+                names,
+                [e * p for e, p in zip(effs, purs)],
+                label="eff * pur",
+                marker="o",
+            )
             fig.tight_layout()
             plt.show()
         else:
-            e = ax.scatter(names, effs, label="efficiency", color="tab:blue")
+            (e,) = ax.plot(
+                names, effs, label="efficiency", color="tab:blue", marker="o"
+            )
             ax2 = ax.twinx()
-            p = ax2.scatter(names, purs, label="purity", color="tab:orange")
+            (p,) = ax2.plot(names, purs, label="purity", color="tab:orange", marker="o")
             ax.set_ylabel("Efficiency")
             ax2.set_ylabel("Purity")
-            ax2.legend([e, p], ["Eff.", "Pur."])
+            ax.legend([e, p], ["Efficiency", "Purity"])
             fig.tight_layout()
             plt.show()
 
@@ -244,7 +251,7 @@ class Selection:
 
         fig, ax = plt.subplots(tight_layout=True)
 
-        arr = self.samples[0].df.arrays(BRANCH_LIST)
+        arr = self.samples[0].df.arrays(BRANCH_LIST)  # type: ignore
 
         cond = signal_def(arr) if signal else True
 
