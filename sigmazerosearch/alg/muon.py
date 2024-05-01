@@ -1,7 +1,7 @@
+import awkward as ak
+
 from sigmazerosearch.types.selection import ParameterSet
 from sigmazerosearch.utils import displacement
-
-import awkward as ak
 
 pid_cut = 0.0
 min_length = 0.0

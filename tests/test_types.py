@@ -1,5 +1,5 @@
-from sigmazerosearch.types.selection import Selection, Cut, Sample, SampleType
 from sigmazerosearch.types.general import PDG
+from sigmazerosearch.types.selection import Cut, Sample, SampleType, Selection
 
 # TODO: split this file into separate files for each large type for more
 # detailed testing, e.g. multiple tests for Selection

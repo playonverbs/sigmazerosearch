@@ -1,7 +1,8 @@
-import uproot as up
-import awkward as aw
-from uproot.behaviors.TBranch import HasBranches
 from os.path import isabs
+
+import awkward as aw
+import uproot as up
+from uproot.behaviors.TBranch import HasBranches
 
 
 def load_ntuple(filename: str) -> HasBranches:

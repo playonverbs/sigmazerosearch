@@ -1,17 +1,17 @@
 from enum import Enum
-import matplotlib.pyplot as plt
-
-import awkward as ak
-import numpy as np
-from uproot.behaviors.TBranch import HasBranches
-import sigmazerosearch.utils as utils
-import sigmazerosearch.alg.fv as fv
-from sigmazerosearch.types.truth import GenType
-from sigmazerosearch.types.general import PDG
-from sigmazerosearch.loader.loader import get_POT, load_ntuple
-
 from os.path import isabs
 from typing import Callable
+
+import awkward as ak
+import matplotlib.pyplot as plt
+import numpy as np
+from uproot.behaviors.TBranch import HasBranches
+
+import sigmazerosearch.alg.fv as fv
+import sigmazerosearch.utils as utils
+from sigmazerosearch.loader.loader import get_POT, load_ntuple
+from sigmazerosearch.types.general import PDG
+from sigmazerosearch.types.truth import GenType
 
 """
 ValueUnc represents a central value with either a symmetric or (upper,
