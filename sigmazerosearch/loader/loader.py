@@ -1,6 +1,6 @@
 from os.path import isabs
 
-import awkward as aw
+import awkward as ak
 import uproot as up
 from uproot.behaviors.TBranch import HasBranches
 
@@ -21,5 +21,5 @@ def get_POT(filename: str):
     if not isabs(filename):
         raise OSError("Please provide an absolute file path")
     data = up.open(filename)
-    pots_per_subrun: aw.Array = data.get("ana/MetaTree").get("POT").array()  # type: ignore
-    return aw.sum(pots_per_subrun)
+    pots_per_subrun: ak.Array = data.get("ana/MetaTree").get("POT").array()  # type: ignore
+    return ak.sum(pots_per_subrun)

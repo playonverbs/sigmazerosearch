@@ -7,7 +7,8 @@ import vector
 
 def displacement(x_i, y_i, z_i, arr) -> ak.Array:
     """
-    compute displacement array from given x,y,z array indices to reco_primary_vtx
+    compute displacement array from given x,y,z array indices to
+    reco_primary_vtx
     """
     v = vector.zip(
         {
@@ -26,7 +27,7 @@ def displacement(x_i, y_i, z_i, arr) -> ak.Array:
 
     res = (v - u).mag
 
-    return ak.mask(res, ak.num(res) != 0)
+    return ak.mask(res, ak.num(res) != 0)  # type: ignore
 
 
 def print_rse(arr: ak.Array, file=sys.stdout):
