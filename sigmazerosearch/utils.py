@@ -1,3 +1,6 @@
+import logging
+import sys
+
 import awkward as ak
 import vector
 
@@ -24,6 +27,17 @@ def displacement(x_i, y_i, z_i, arr) -> ak.Array:
     res = (v - u).mag
 
     return ak.mask(res, ak.num(res) != 0)
+
+
+def print_rse(arr: ak.Array, file=sys.stdout):
+    """
+    print the event details in the format "run subrun event",
+    the file parameter can be used to pipe this output to a file
+    (useful for filtering upstream).
+    """
+    for elem in arr:
+        print(f"{elem.run} {elem.subrun} {elem.event}", file=file)  # type: ignore
+    logging.info(f"output rse numbers for {len(arr)} events")
 
 
 def file_ok(filename: str, mode: str = "read") -> bool:
