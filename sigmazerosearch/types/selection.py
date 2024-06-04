@@ -1,3 +1,4 @@
+import pathlib
 from enum import Enum
 from os.path import isabs
 from typing import Callable
@@ -26,6 +27,9 @@ BRANCH_LIST = None
 #     "NPrimaryShowerDaughters",
 #     "RecoPrimaryVertex",
 # ]
+PLOT_DIR = "./plots"
+FORMAT = "png"
+SAVE = False
 
 
 def signal_def(arr: ak.Array) -> ak.Array:
@@ -149,6 +153,7 @@ class Selection:
         self.parameters: ParameterSet = ParameterSet(kwargs["params"])
         self.samples: SampleSet = kwargs["samples"]
         self.cuts: list[Cut] = kwargs["cuts"]
+        self.label: str = "_" + kwargs["label"] if kwargs.get("label") else ""
 
     @classmethod
     def empty(cls):
@@ -165,6 +170,9 @@ class Selection:
         Apply a given selection cut's cut function to the sample arrays and
         accumulates the resulting number of signal, background and total
         passing particles per cut.
+
+        Returns the destructively masked array after cut conditions have been
+        applied.
         """
         for i, cut in enumerate(self.cuts):
             if cut.name != cutname:
@@ -182,6 +190,7 @@ class Selection:
                     cut.n_background = (ak.sum(~signal_def(arr), axis=None), 0, 0)  # type: ignore
                     cut.n_passing = (ak.sum(cond, axis=None), 0, 0)  # type: ignore
                     cut.applied = True
+                    return arr
                 else:
                     raise TypeError(f"sample {s.file_name} has not been loaded")
 
@@ -212,6 +221,13 @@ class Selection:
         ax.bar(labels, lost, label="lost", bottom=counted)
         ax.legend()
         fig.tight_layout()
+        if SAVE:
+            fig.savefig(
+                pathlib.Path(
+                    PLOT_DIR, f"particle_reco_efficiency{self.label}.{FORMAT}"
+                ),
+                dpi=300,
+            )
         plt.show()
 
     def plot_eff_pur(self, exp: bool = False) -> None:
@@ -230,8 +246,6 @@ class Selection:
                 label="eff * pur",
                 marker="o",
             )
-            fig.tight_layout()
-            plt.show()
         else:
             (e,) = ax.plot(
                 names, effs, label="efficiency", color="tab:blue", marker="o"
@@ -241,8 +255,14 @@ class Selection:
             ax.set_ylabel("Efficiency")
             ax2.set_ylabel("Purity")
             ax.legend([e, p], ["Efficiency", "Purity"])
-            fig.tight_layout()
-            plt.show()
+
+        fig.tight_layout()
+        if SAVE:
+            fig.savefig(
+                pathlib.Path(PLOT_DIR, f"selection_performance{self.label}.{FORMAT}"),
+                dpi=300,
+            )
+        plt.show()
 
     def plot_slice_info(self, type="both", signal=True) -> None:
         if type not in ["both", "purity", "completeness"]:
@@ -251,6 +271,9 @@ class Selection:
             )
 
         fig, ax = plt.subplots(tight_layout=True)
+
+        title = "Slice Info (Signal)" if signal else "Slice Info (All)"
+        ax.set_title(title, loc="right", color="grey", weight="bold")
 
         arr = self.samples[0].df.arrays(BRANCH_LIST)  # type: ignore
 
@@ -285,6 +308,11 @@ class Selection:
                 histtype="step",
             )
 
+        fig.tight_layout()
+        if SAVE:
+            fig.savefig(
+                pathlib.Path(PLOT_DIR, f"slice_info{self.label}.{FORMAT}"), dpi=300
+            )
         plt.show()
 
     def sample_types(self) -> list[SampleType | None]:
@@ -331,6 +359,7 @@ class Selection:
                     ],
                     headers=headers,
                     tablefmt=format,
+                    floatfmt=("", "", "", ".5f", ".5f"),
                 )
             )
 
