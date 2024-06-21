@@ -1,26 +1,34 @@
 #!/usr/bin/env python3
+import logging
+
+import awkward as ak
+import matplotlib.pyplot as plt
+
+from sigmazerosearch.alg.muon import select_mu_candidate
 from sigmazerosearch.types.selection import (
-    Selection,
     Cut,
+    ParameterSet,
     Sample,
     SampleSet,
     SampleType,
-    ParameterSet,
+    Selection,
 )
-from sigmazerosearch.alg.muon import select_mu_candidate
-import awkward as ak
 
 pset = ParameterSet({"pid_cut": 0.6, "min_length": 10, "max_separation": 1})
 
 sel = Selection(
     cuts=[
+        # Cut(
+        #     "has-reco-nu",
+        #     lambda arr: arr["reco_primary_vtx_x"] > -999,
+        # ),
         Cut(
             "fv",
             lambda arr: arr["reco_primary_vtx_inFV"],
         ),
         Cut(
             "tracks",
-            lambda arr: ak.sum(arr["pfp_trk_shr_score"] > 0.5, axis=1) >= 3,
+            lambda arr: ak.sum(arr["pfp_trk_shr_score"] >= 0.5, axis=1) >= 3,
         ),
         Cut(
             "showers",
@@ -40,23 +48,24 @@ sel = Selection(
             SampleType.Hyperon,
             None,
         ),
-        base_dir="/home/niam/phd/data/hyperons/run3b_RHC",
+        base_dir="/home/niam/phd/data/hyperons/multiSlice/run3b_RHC",
     ),
     params=pset,
+    label="nominal",
 )
 
 
 def main():
     # TODO: wrap Selection with a context manager `with open()`-like
     # needs: sel.__enter__(...) and sel.__exit(...)
+    logging.basicConfig(format="%(asctime)s %(message)s", level=logging.INFO)
     print("Opening files")
     sel.open_files()
 
     for sam in sel.samples:
-        print(sam.file_name.split("/")[-1], sam.type.name, sam.POT)
+        print(sam.file_name.split("/")[-1], sam.type.name, sam.POT, sep="\t")
 
     print()
-    sel.plot_reco_effs()
 
     for n, cut in enumerate(sel.cuts):
         print(f"Applying {n}. {cut.name} Cut\t", end="", flush=True)
@@ -65,8 +74,23 @@ def main():
 
     print()
 
-    sel.cut_summary(header=True)
-    sel.plot_eff_pur()
+    sel.cut_summary(header=True, format="md")
+
+    # sel.plot_slice_info(signal=False)
+    # sel.plot_slice_info(signal=True)
+    # sel.plot_reco_effs(signal=True)
+    # sel.plot_eff_pur()
+
+    arr = sel.samples[0].df.arrays()
+
+    fig, ax = plt.subplots()
+
+    h2 = ax.hist2d(
+        arr["flash_match_nu_slice_ID"].to_numpy(),
+        arr["true_nu_slice_ID"].to_numpy(),
+    )
+    fig.colorbar(h2[3], ax=ax, label="Number of slices")
+    plt.show()
 
     print("Closing files")
     sel.close_files()
