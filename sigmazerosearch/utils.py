@@ -38,7 +38,7 @@ def print_rse(arr: ak.Array, file=sys.stdout):
     """
     for elem in arr:
         print(f"{elem.run} {elem.subrun} {elem.event}", file=file)  # type: ignore
-    logging.info(f"output rse numbers for {len(arr)} events")
+    logging.info(f"output rse numbers for {len(arr)} events to {file.name}")
 
 
 def file_ok(filename: str, mode: str = "read") -> bool:
