@@ -42,6 +42,8 @@ def signal_def(arr: ak.Array) -> ak.Array:
             fv.in_active_tpc(
                 arr["mc_nu_pos_x"], arr["mc_nu_pos_y"], arr["mc_nu_pos_z"]
             ),
+            ak.sum(arr["mc_decay_pdg"] == PDG.Proton.value, axis=1) >= 1,
+            ak.sum(arr["mc_decay_pdg"] == PDG.Pi.anti, axis=1) >= 1,
         )
     )  # type: ignore
 
