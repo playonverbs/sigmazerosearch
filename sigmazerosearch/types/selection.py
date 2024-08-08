@@ -32,6 +32,47 @@ FORMAT = "png"
 SAVE = False
 
 
+class EventCategory:
+    @staticmethod
+    def Signal(arr):
+        return signal_def(arr)
+
+    @staticmethod
+    def Lambda(arr):
+        return arr["mc_hyperon_pdg"] == PDG.Lambda.value
+
+    @staticmethod
+    def NuMuCC(arr):
+        return np.logical_and.reduce(
+            [
+                np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
+                np.abs(arr["mc_lepton_pdg"]) == PDG.Muon.value,
+            ]
+        )
+
+    @staticmethod
+    def NC(arr):
+        return np.logical_and.reduce(
+            [
+                np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
+                np.abs(arr["mc_lepton_pdg"]) == PDG.NuMu.value,
+            ]
+        )  # type: ignore
+
+    @staticmethod
+    def Other(arr):
+        return np.logical_and.reduce(
+            np.logical_not(
+                [
+                    EventCategory.Signal(arr),
+                    EventCategory.Lambda(arr),
+                    EventCategory.NuMuCC(arr),
+                    EventCategory.NC(arr),
+                ]
+            )
+        )
+
+
 def signal_def(arr: ak.Array) -> ak.Array:
     """takes an awkward.Array with fields corresponding to ntuple branches,
     applies a mask and returns a boolean array"""
@@ -147,6 +188,7 @@ class Sample:
 class SampleSet(list[Sample]):
     def __init__(self, *samples, **kwargs):
         super().__init__(samples)
+        self.target_POT: float | None = kwargs.get("target_POT")
         # self.base_dir: str = kwargs["base_dir"] if kwargs["base_dir"] else "."
 
 
