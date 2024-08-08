@@ -72,6 +72,10 @@ class Cut:
         """Calculate the selection purity at the current Cut"""
         return self.n_signal[0] / self.n_passing[0]
 
+    def __call__(self, *args):
+        """Allow an instance of Cut to be used like its cutfunc"""
+        return self.cutfunc(*args)
+
     def _validate_(self) -> bool:
         """validate the cut data"""
         if self.n_signal[0] < 0 or self.n_passing[0] < 0 or self.n_background[0] < 0:
@@ -330,7 +334,7 @@ class Selection:
         return True
 
     def open_files(self) -> None:
-        """load all samples into dataframes asynchronously (for now)"""
+        """load all samples into dataframes synchronously (for now)"""
         for sample in self.samples:
             sample.load_df()
 

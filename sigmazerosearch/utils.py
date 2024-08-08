@@ -2,6 +2,7 @@ import logging
 import sys
 
 import awkward as ak
+import numpy as np
 import vector
 
 
@@ -28,6 +29,17 @@ def displacement(x_i, y_i, z_i, arr) -> ak.Array:
     res = (v - u).mag
 
     return ak.mask(res, ak.num(res) != 0)  # type: ignore
+
+
+def filter_by_rse(arr: ak.Array, run: int, subrun: int, event: int) -> ak.Array:
+    cond = np.logical_and.reduce(
+        (
+            arr["run"] == run,
+            arr["subrun"] == subrun,
+            arr["event"] == event,
+        )
+    )
+    return arr[cond]  # type: ignore
 
 
 def print_rse(arr: ak.Array, file=sys.stdout):
