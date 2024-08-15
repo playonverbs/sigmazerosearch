@@ -6,7 +6,7 @@ import numpy as np
 import vector
 
 
-def displacement(x_i, y_i, z_i, arr) -> ak.Array:
+def displacement(arr, x_i, y_i, z_i) -> ak.Array:
     """
     compute displacement array from given x,y,z array indices to
     reco_primary_vtx

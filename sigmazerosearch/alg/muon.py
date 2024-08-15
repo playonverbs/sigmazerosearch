@@ -17,7 +17,7 @@ def select_mu_candidate(arr: ak.Array, pset: ParameterSet) -> ak.Array:
         & (arr["trk_length"] < pset["min_length"])
         & ak.fill_none(
             ak.any(
-                displacement("trk_start_x", "trk_start_y", "trk_start_z", arr)
+                displacement(arr, "trk_start_x", "trk_start_y", "trk_start_z")
                 < pset["max_separation"],
                 axis=1,
             ),
