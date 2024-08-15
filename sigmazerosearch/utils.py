@@ -6,6 +6,24 @@ import numpy as np
 import vector
 
 
+def npfp(arr, opt: str | None = None) -> ak.Array:
+    """
+    returns the number of pfps in the given array that are either track-like,
+    shower-like, or both.
+    """
+    trk = arr["pfp_trk_shr_score"] > 0.5
+    shr = arr["pfp_trk_shr_score"] < 0.5
+
+    if opt == "both" or opt is None:
+        return ak.sum((trk | shr), axis=1)
+    elif "track" in opt:
+        return ak.sum(trk, axis=1)
+    elif "shower" in opt:
+        return ak.sum(shr, axis=1)
+    else:
+        raise TypeError
+
+
 def displacement(arr, x_i, y_i, z_i) -> ak.Array:
     """
     compute displacement array from given x,y,z array indices to
