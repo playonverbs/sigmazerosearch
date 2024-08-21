@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class PDG(Enum):
+class PDG(IntEnum):
     """
     Enum representing the PDG codes relevant to the analysis.
     """

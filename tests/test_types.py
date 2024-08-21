@@ -14,6 +14,7 @@ def test_PDG():
     assert PDG.Lambda.anti == PDG.Lambda.value
     assert ~PDG.Kaon == -321
     assert -PDG.Kaon == -321
+    assert PDG.Sigma0 == 3212
 
 
 def test_Cut():
