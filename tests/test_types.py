@@ -1,3 +1,5 @@
+import pytest
+
 from sigmazerosearch.types.general import PDG
 from sigmazerosearch.types.selection import Cut, Sample, SampleType, Selection
 
@@ -17,12 +19,21 @@ def test_PDG():
     assert PDG.Sigma0 == 3212
 
 
-def test_Cut():
+@pytest.fixture
+def eg_Cut():
+    return Cut("bar", lambda: "hello")
+
+
+def test_Cut(eg_Cut):
     c1 = Cut("this", lambda: 2)
     assert c1.name == "this"
+    assert c1() == 2
 
     c2 = Cut("that", lambda: 3)
     assert c1.name != c2.name
+    assert c2() == 3
+
+    assert eg_Cut() == "hello"
 
 
 def test_Sample():

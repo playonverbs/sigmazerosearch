@@ -50,6 +50,10 @@ def displacement(arr, x_i, y_i, z_i) -> ak.Array:
 
 
 def filter_by_rse(arr: ak.Array, run: int, subrun: int, event: int) -> ak.Array:
+    """
+    takes an array and either three numbers corresponding to run, subrun, event
+    numbers or a list of such numbers
+    """
     cond = np.logical_and.reduce(
         (
             arr["run"] == run,
