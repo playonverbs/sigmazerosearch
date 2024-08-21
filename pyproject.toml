@@ -9,7 +9,6 @@ readme = "README.md"
 python = "^3.10"
 matplotlib = "^3.8.2"
 pandas = "^2.1.4"
-polars = {extras = ["numpy", "pandas", "plot"], version = "^0.20.4"}
 numpy = "^1.26.3"
 scipy = "^1.11.4"
 uproot = "^5.2.1"
@@ -27,7 +26,7 @@ ruff = "^0.4.2"
 jupyterlab = "^4.2.0"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^7.4.4"
+pytest = "^8.0.0"
 
 [tool.ruff.lint]
 extend-select = [
