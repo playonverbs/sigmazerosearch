@@ -13,6 +13,10 @@ FV_z: Sides = (0.1, 1036.9)
 
 
 def in_active_tpc(x, y, z):
-    return np.logical_or.reduce(
-        (x > FV_x[1], x < FV_x[0], y > FV_y[1], y < FV_y[0], z > FV_z[1], z < FV_z[0])
+    """
+    Given a set of scalar or vector values corresponding to x, y, z coordinates,
+    returns if the point(s) are inside of the fiducial volume as currently defined by this file.
+    """
+    return np.logical_and.reduce(
+        (x > FV_x[0], x < FV_x[1], y > FV_y[0], y < FV_y[1], z > FV_z[0], z < FV_z[1])
     )
