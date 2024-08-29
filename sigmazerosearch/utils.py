@@ -1,3 +1,7 @@
+"""
+Mixed utility functions.
+"""
+
 import logging
 import pathlib
 import sys
@@ -33,7 +37,7 @@ def _save_plot(config: Config, fig: Figure, title: str):
 
 def npfp(arr, opt: str | None = None) -> ak.Array:
     """
-    returns the number of pfps in the given array that are either track-like,
+    Returns the number of pfps in the given array that are either track-like,
     shower-like, or both.
     """
     trk = arr["pfp_trk_shr_score"] > 0.5
@@ -51,7 +55,7 @@ def npfp(arr, opt: str | None = None) -> ak.Array:
 
 def displacement(arr, x_i, y_i, z_i) -> ak.Array:
     """
-    compute displacement array from given x,y,z array indices to
+    Compute displacement array from given x,y,z array indices to
     reco_primary_vtx
     """
     v = vector.zip(
@@ -76,7 +80,7 @@ def displacement(arr, x_i, y_i, z_i) -> ak.Array:
 
 def filter_by_rse(arr: ak.Array, run: int, subrun: int, event: int) -> ak.Array:
     """
-    takes an array and either three numbers corresponding to run, subrun, event
+    Takes an array and either three numbers corresponding to run, subrun, event
     numbers or a list of such numbers
     """
     cond = np.logical_and.reduce(
@@ -91,7 +95,7 @@ def filter_by_rse(arr: ak.Array, run: int, subrun: int, event: int) -> ak.Array:
 
 def print_rse(arr: ak.Array, file=sys.stdout):
     """
-    print the event details in the format "run subrun event",
+    Print the event details in the format "run subrun event",
     the file parameter can be used to pipe this output to a file
     (useful for filtering upstream).
     """

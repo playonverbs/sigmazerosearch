@@ -1,3 +1,7 @@
+"""
+General types to aid in configuring the framework.
+"""
+
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
@@ -60,7 +64,7 @@ class PDG(IntEnum):
 
     @property
     def anti(self) -> int:
-        """gets the anti-particle pdg code value excluding neutral particles"""
+        """Gets the anti-particle pdg code value excluding neutral particles"""
         neutrals = [PDG.Lambda, PDG.Neutron, PDG.Photon] + [
             x for x in PDG if x.name.endswith("0")
         ]
