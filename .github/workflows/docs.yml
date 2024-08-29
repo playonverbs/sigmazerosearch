@@ -5,9 +5,11 @@ on:
   push:
     branches:
       - main
-    # Alternative: only build for tags.
-    # tags:
-    #   - '*'
+# build documentation for tags.
+# on:
+#   push:
+#     tags:
+#       - '*'
 
 # security: restrict permissions for CI jobs.
 permissions:
@@ -31,7 +33,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/
+          path: docs/sigmazerosearch/
 
   # Deploy the artifact to GitHub pages.
   # This is a separate job so that only actions/deploy-pages has the necessary permissions.
