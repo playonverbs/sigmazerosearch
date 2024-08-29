@@ -1,4 +1,41 @@
+from dataclasses import dataclass
 from enum import IntEnum
+from pathlib import Path
+from typing import Iterable
+
+
+@dataclass
+class Config:
+    """
+    Config represents configuration options that will affect the operation of
+    the selection framework but should not effect the physics choices made by
+    the framework.
+    """
+
+    plot_save: bool = False
+    plot_dir: Path | None = None
+    plot_format: str | Iterable[str] = "png"
+    branch_list: Iterable[str] | None = None
+
+    def __post_init__(self):
+        self.validate()
+
+    @classmethod
+    def default(cls):
+        return cls()
+
+    def validate(self):
+        """
+        Checks if certain config value combinations have been set together.
+
+        For example: plotting requires an output format(s) and an output
+        directory
+        """
+        if self.plot_save and self.plot_dir is None:
+            raise Exception("ensure all required plot options are set")
+
+        if self.plot_dir is not None and not self.plot_dir.is_dir():
+            raise ValueError("plot_dir should be a path to a directory")
 
 
 class PDG(IntEnum):

@@ -1,4 +1,3 @@
-import pathlib
 from enum import Enum
 from os.path import isabs
 from typing import Callable
@@ -12,7 +11,7 @@ from uproot.behaviors.TBranch import HasBranches
 import sigmazerosearch.alg.fv as fv
 import sigmazerosearch.utils as utils
 from sigmazerosearch.loader.loader import get_POT, load_ntuple
-from sigmazerosearch.types.general import PDG
+from sigmazerosearch.types.general import PDG, Config
 from sigmazerosearch.types.truth import GenType
 
 """
@@ -27,9 +26,6 @@ BRANCH_LIST = None
 #     "NPrimaryShowerDaughters",
 #     "RecoPrimaryVertex",
 # ]
-PLOT_DIR = "./plots"
-FORMAT = "png"
-SAVE = False
 
 
 class EventCategory:
@@ -202,6 +198,8 @@ class Selection:
         self.samples: SampleSet = kwargs["samples"]
         self.cuts: list[Cut] = kwargs["cuts"]
         self.label: str = "_" + kwargs["label"] if kwargs.get("label") else ""
+        self.config: Config = kwargs.get("config", Config.default())
+        self.config.validate()
 
     @classmethod
     def empty(cls):
@@ -250,7 +248,7 @@ class Selection:
 
         for s in self.samples:
             if isinstance(s.df, HasBranches):
-                arr = s.df.arrays(BRANCH_LIST)
+                arr = s.df.arrays(self.config.branch_list)
                 for pdg in pdgs:
                     cond = ak.sum(arr["pfp_true_pdg"] == pdg, axis=1) >= 1  # type: ignore
                     if signal:
@@ -269,13 +267,8 @@ class Selection:
         ax.bar(labels, lost, label="lost", bottom=counted)
         ax.legend()
         fig.tight_layout()
-        if SAVE:
-            fig.savefig(
-                pathlib.Path(
-                    PLOT_DIR, f"particle_reco_efficiency{self.label}.{FORMAT}"
-                ),
-                dpi=300,
-            )
+        if self.config.plot_save:
+            utils._save_plot(self.config, fig, f"particle_reco_efficiency{self.label}")
         plt.show()
 
     def plot_eff_pur(self, exp: bool = False) -> None:
@@ -305,11 +298,8 @@ class Selection:
             ax.legend([e, p], ["Efficiency", "Purity"])
 
         fig.tight_layout()
-        if SAVE:
-            fig.savefig(
-                pathlib.Path(PLOT_DIR, f"selection_performance{self.label}.{FORMAT}"),
-                dpi=300,
-            )
+        if self.config.plot_save:
+            utils._save_plot(self.config, fig, f"selection_performance{self.label}")
         plt.show()
 
     def plot_slice_info(self, type="both", signal=True) -> None:
@@ -357,10 +347,8 @@ class Selection:
             )
 
         fig.tight_layout()
-        if SAVE:
-            fig.savefig(
-                pathlib.Path(PLOT_DIR, f"slice_info{self.label}.{FORMAT}"), dpi=300
-            )
+        if self.config.plot_save:
+            utils._save_plot(self.config, fig, f"slice_info{self.label}")
         plt.show()
 
     def sample_types(self) -> list[SampleType | None]:
