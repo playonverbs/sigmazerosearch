@@ -10,9 +10,9 @@ from uproot.behaviors.TBranch import HasBranches
 
 import sigmazerosearch.alg.fv as fv
 import sigmazerosearch.utils as utils
-from sigmazerosearch.loader.loader import get_POT, load_ntuple
-from sigmazerosearch.types.general import PDG, Config
-from sigmazerosearch.types.truth import GenType
+from sigmazerosearch.general import PDG, Config
+from sigmazerosearch.loader import get_POT, load_ntuple
+from sigmazerosearch.truth import GenType
 
 """
 ValueUnc represents a central value with either a symmetric or (upper,

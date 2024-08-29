@@ -2,8 +2,8 @@ import pathlib
 
 import pytest
 
-from sigmazerosearch.types.general import PDG, Config
-from sigmazerosearch.types.selection import Cut, Sample, SampleType, Selection
+from sigmazerosearch.general import PDG, Config
+from sigmazerosearch.selection import Cut, Sample, SampleType, Selection
 
 # TODO: split this file into separate files for each large type for more
 # detailed testing, e.g. multiple tests for Selection

@@ -1,6 +1,6 @@
 import awkward as ak
 
-from sigmazerosearch.types.selection import ParameterSet
+from sigmazerosearch.selection import ParameterSet
 from sigmazerosearch.utils import displacement
 
 pid_cut = 0.0

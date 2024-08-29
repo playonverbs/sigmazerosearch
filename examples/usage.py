@@ -5,7 +5,7 @@ import awkward as ak
 import matplotlib.pyplot as plt
 
 from sigmazerosearch.alg.muon import select_mu_candidate
-from sigmazerosearch.types.selection import (
+from sigmazerosearch.selection import (
     Cut,
     ParameterSet,
     Sample,
