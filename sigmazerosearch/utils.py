@@ -1,9 +1,34 @@
 import logging
+import pathlib
 import sys
 
 import awkward as ak
 import numpy as np
 import vector
+from matplotlib.figure import Figure
+
+from sigmazerosearch.types.general import Config
+
+
+def _save_plot(config: Config, fig: Figure, title: str):
+    if isinstance(config.plot_format, list):
+        for format in config.plot_format:
+            fig.savefig(
+                pathlib.Path(config.plot_dir / f"{title}.{format}"),
+                dpi=300,
+            )
+            logging.info(
+                "saved plot to %s", pathlib.Path(config.plot_dir / f"{title}.{format}")
+            )
+    else:
+        fig.savefig(
+            pathlib.Path(config.plot_dir / f"{title}.{config.plot_format}"),
+            dpi=300,
+        )
+        logging.info(
+            "saved plot to %s",
+            pathlib.Path(config.plot_dir / f"{title}.{config.plot_format}"),
+        )
 
 
 def npfp(arr, opt: str | None = None) -> ak.Array:
