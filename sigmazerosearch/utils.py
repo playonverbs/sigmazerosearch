@@ -7,7 +7,7 @@ import numpy as np
 import vector
 from matplotlib.figure import Figure
 
-from sigmazerosearch.types.general import Config
+from sigmazerosearch.general import Config
 
 
 def _save_plot(config: Config, fig: Figure, title: str):

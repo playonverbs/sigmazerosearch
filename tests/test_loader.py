@@ -1,4 +1,4 @@
-from sigmazerosearch.loader.loader import load_ntuple
+from sigmazerosearch.loader import load_ntuple
 
 
 def test_loader():
