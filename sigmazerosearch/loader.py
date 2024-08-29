@@ -1,3 +1,10 @@
+"""
+Abstracted data-file loading procedures.
+
+Currently ROOT NTuple files are accepted (as per the output of
+HyperonProduction). However other data files may be added in the future.
+"""
+
 from os.path import isabs
 
 import awkward as ak

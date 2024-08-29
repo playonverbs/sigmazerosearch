@@ -1,3 +1,7 @@
+"""
+Selection contains the main objects for handling the physics selection.
+"""
+
 from enum import Enum
 from os.path import isabs
 from typing import Callable
@@ -14,18 +18,11 @@ from sigmazerosearch.general import PDG, Config
 from sigmazerosearch.loader import get_POT, load_ntuple
 from sigmazerosearch.truth import GenType
 
+ValueUnc = tuple[float, float] | tuple[float, float, float]
 """
 ValueUnc represents a central value with either a symmetric or (upper,
 lower) associated error.
 """
-ValueUnc = tuple[float, float] | tuple[float, float, float]
-
-BRANCH_LIST = None
-# BRANCH_LIST = [
-#     "reco_primary_vtx_inFV" "mc_hyperon_pdg" "pfp_true_pdg" "NPrimaryTrackDaughters",
-#     "NPrimaryShowerDaughters",
-#     "RecoPrimaryVertex",
-# ]
 
 
 class EventCategory:
@@ -70,7 +67,7 @@ class EventCategory:
 
 
 def signal_def(arr: ak.Array) -> ak.Array:
-    """takes an awkward.Array with fields corresponding to ntuple branches,
+    """Takes an awkward.Array with fields corresponding to ntuple branches,
     applies a mask and returns a boolean array"""
     return np.logical_and.reduce(
         (
@@ -89,9 +86,9 @@ class Cut:
     """Cut represents a single selection cut and the selection state for it."""
 
     total_signal = 0.0
-    n_signal: ValueUnc
-    n_passing: ValueUnc
-    n_background: ValueUnc
+    # n_signal: ValueUnc
+    # n_passing: ValueUnc
+    # n_background: ValueUnc
 
     def __init__(self, name: str, cutfunc: Callable):
         self.name: str = name
@@ -127,7 +124,7 @@ ParameterSet = dict[str, bool | float | int]  # STUB
 
 
 class SampleType(Enum):
-    """represents different types of samples being fed into the selection"""
+    """Represents different types of samples being fed into the selection"""
 
     Data = 0
     Background = 1
@@ -137,15 +134,15 @@ class SampleType(Enum):
 
 
 class Sample:
-    """represents samples and their associated data types"""
+    """Represents samples and their associated data types"""
 
-    name: str
-    file_name: str
-    type: SampleType | None = None
-    POT: float
-    gen_type: GenType
-    is_data: bool
-    df: HasBranches | None = None
+    # name: str
+    # file_name: str
+    # type: SampleType | None = None
+    # POT: float
+    # gen_type: GenType
+    # is_data: bool
+    # df: HasBranches | None = None
 
     def __init__(
         self,
@@ -154,19 +151,22 @@ class Sample:
         type: SampleType,
         POT: float | None,
         is_data: bool = False,
+        gen_type: GenType = GenType.GENIE,
     ):
-        self.name = name
-        self.file_name = file_name
-        self.type = type
-        self.POT = POT if POT else get_POT(file_name)  # type: ignore
-        self.is_data = is_data
+        self.name: str = name
+        self.file_name: str = file_name
+        self.type: SampleType = type
+        self.gen_type: GenType = gen_type
+        self.POT: float = POT if POT else get_POT(file_name)  # type: ignore
+        self.is_data: bool = is_data
+        self.df: HasBranches | None = None
 
     @classmethod
     def from_dict(cls, kv: dict):
         return cls(kv["name"], kv["file_name"], kv["type"], kv["POT"])
 
     def load_df(self):
-        """read file_name into a pandas dataframe"""
+        """Read file_name into an awkward.Array"""
         if not isabs(self.file_name):
             raise OSError
         self.df = load_ntuple(self.file_name + ":ana/OutputTree")
@@ -182,6 +182,8 @@ class Sample:
 
 
 class SampleSet(list[Sample]):
+    """An ordered collection of `Sample` objects."""
+
     def __init__(self, *samples, **kwargs):
         super().__init__(samples)
         self.target_POT: float | None = kwargs.get("target_POT")
@@ -225,7 +227,7 @@ class Selection:
                 continue
             for s in self.samples:
                 if isinstance(s.df, HasBranches):
-                    arr = s.df.arrays(BRANCH_LIST)
+                    arr = s.df.arrays(self.config.branch_list)
                     if Cut.total_signal == 0.0:
                         Cut.total_signal = ak.sum(signal_def(arr), axis=None)  # type: ignore
                     cond = np.logical_and.reduce(
@@ -272,7 +274,10 @@ class Selection:
         plt.show()
 
     def plot_eff_pur(self, exp: bool = False) -> None:
-        """plot progressive change in selection purity and efficiency"""
+        """
+        Plot progressive change in selection purity and efficiency as a
+        function of `Cut`
+        """
         names: list[str] = [c.name for c in self.cuts]
         effs: list[float] = [c.eff() for c in self.cuts]
         purs: list[float] = [c.pur() for c in self.cuts]
@@ -313,7 +318,7 @@ class Selection:
         title = "Slice Info (Signal)" if signal else "Slice Info (All)"
         ax.set_title(title, loc="right", color="grey", weight="bold")
 
-        arr = self.samples[0].df.arrays(BRANCH_LIST)  # type: ignore
+        arr = self.samples[0].df.arrays(self.config.branch_list)  # type: ignore
 
         cond = signal_def(arr) if signal else True
 
@@ -352,7 +357,7 @@ class Selection:
         plt.show()
 
     def sample_types(self) -> list[SampleType | None]:
-        """list types of all assoc samples"""
+        """List types of all samples associated with this Selection"""
         return [sample.type for sample in self.samples]
 
     def _validate_cuts_(self) -> bool:
