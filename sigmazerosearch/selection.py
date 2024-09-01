@@ -67,7 +67,7 @@ class EventCategory:
 
 
 def signal_def(arr: ak.Array) -> ak.Array:
-    """Takes an awkward.Array with fields corresponding to ntuple branches,
+    """Takes an <inv:#ak.Array> with fields corresponding to ntuple branches,
     applies a mask and returns a boolean array"""
     return np.logical_and.reduce(
         (
@@ -136,14 +136,6 @@ class SampleType(Enum):
 class Sample:
     """Represents samples and their associated data types"""
 
-    # name: str
-    # file_name: str
-    # type: SampleType | None = None
-    # POT: float
-    # gen_type: GenType
-    # is_data: bool
-    # df: HasBranches | None = None
-
     def __init__(
         self,
         name: str,
@@ -182,7 +174,7 @@ class Sample:
 
 
 class SampleSet(list[Sample]):
-    """An ordered collection of `Sample` objects."""
+    """An ordered collection of <project:#Sample> objects."""
 
     def __init__(self, *samples, **kwargs):
         super().__init__(samples)

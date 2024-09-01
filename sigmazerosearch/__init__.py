@@ -21,5 +21,7 @@ https://github.com/playonverbs/HyperonProduction.
 An occasionally-updated spec for the input files is available
 [here](https://hep.lancs.ac.uk/hedgedoc/s/FkkYg14yW).
 
-.. warning:: This project is under very active development. Expect breaking API changes.
+:::{warning}
+This project is under very active development. Expect breaking API changes.
+:::
 """
