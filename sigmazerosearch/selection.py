@@ -86,9 +86,6 @@ class Cut:
     """Cut represents a single selection cut and the selection state for it."""
 
     total_signal = 0.0
-    # n_signal: ValueUnc
-    # n_passing: ValueUnc
-    # n_background: ValueUnc
 
     def __init__(self, name: str, cutfunc: Callable):
         self.name: str = name
@@ -183,10 +180,6 @@ class SampleSet(list[Sample]):
 
 
 class Selection:
-    # parameters: ParameterSet
-    # samples: SampleSet
-    # cuts: list[Cut]
-
     def __init__(self, **kwargs):
         self.parameters: ParameterSet = ParameterSet(kwargs["params"])
         self.samples: SampleSet = kwargs["samples"]
@@ -194,16 +187,6 @@ class Selection:
         self.label: str = "_" + kwargs["label"] if kwargs.get("label") else ""
         self.config: Config = kwargs.get("config", Config.default())
         self.config.validate()
-
-    @classmethod
-    def empty(cls):
-        return cls
-
-    @classmethod
-    def with_cuts(cls, cuts: list[Cut]):
-        out = cls()
-        out.cuts = cuts
-        return out
 
     def apply_cut(self, cutname: str):
         """

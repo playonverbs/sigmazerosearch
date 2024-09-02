@@ -75,7 +75,6 @@ def test_Selection():
     s = Selection(
         params={}, samples={}, cuts=[Cut("cut1", lambda: 2), Cut("cut2", lambda: 3)]
     )
-    # s.cuts = [Cut("cut1", "inFV"), Cut("cut2", "inFV && NuMu")]
 
     s.cuts[0].n_signal = (60, 10)
     s.cuts[0].n_passing = (40, 5)
@@ -83,6 +82,3 @@ def test_Selection():
     s.cuts[1].n_signal = (30, 10)
     s.cuts[1].n_passing = (15, 5)
     s.cuts[1].n_background = (1e4, 1e2)
-
-    # t = Selection.with_cuts([Cut("cut1", "inFV")])
-    # assert t.cuts[0].name == s.cuts[0].name

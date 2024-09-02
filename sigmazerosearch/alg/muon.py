@@ -3,10 +3,6 @@ import awkward as ak
 from sigmazerosearch.selection import ParameterSet
 from sigmazerosearch.utils import displacement
 
-pid_cut = 0.0
-min_length = 0.0
-max_separation = 0.0
-
 
 def select_mu_candidate(arr: ak.Array, pset: ParameterSet) -> ak.Array:
     """
