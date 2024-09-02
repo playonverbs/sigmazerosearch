@@ -74,9 +74,10 @@ intersphinx_mapping = {
 html_theme = "furo"
 html_static_path = ["_static"]
 html_title = "sigmazerosearch"
-html_css_files = ["css/custom.css"]
 
 html_theme_options = {
+    "dark_logo": "logo-dark.png",
+    "light_logo": "logo.png",
     "footer_icons": [
         {
             "name": "GitHub",
