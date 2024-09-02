@@ -27,15 +27,15 @@ lower) associated error.
 
 class EventCategory:
     @staticmethod
-    def Signal(arr):
+    def Signal(arr: ak.Array) -> ak.Array:
         return signal_def(arr)
 
     @staticmethod
-    def Lambda(arr):
-        return arr["mc_hyperon_pdg"] == PDG.Lambda.value
+    def Lambda(arr: ak.Array) -> ak.Array:
+        return arr["mc_hyperon_pdg"] == PDG.Lambda.value  # type: ignore
 
     @staticmethod
-    def NuMuCC(arr):
+    def NuMuCC(arr: ak.Array) -> ak.Array:
         return np.logical_and.reduce(
             [
                 np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
@@ -44,7 +44,7 @@ class EventCategory:
         )
 
     @staticmethod
-    def NC(arr):
+    def NC(arr: ak.Array) -> ak.Array:
         return np.logical_and.reduce(
             [
                 np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
@@ -53,7 +53,7 @@ class EventCategory:
         )  # type: ignore
 
     @staticmethod
-    def Other(arr):
+    def Other(arr: ak.Array) -> ak.Array:
         return np.logical_and.reduce(
             np.logical_not(
                 [
