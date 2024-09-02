@@ -13,7 +13,10 @@ from uproot.behaviors.TBranch import HasBranches
 
 
 def load_ntuple(filename: str) -> HasBranches:
-    """wraps the uproot.open method, taking a filename and outputting some ROOT object that has branches"""
+    """
+    Wraps the uproot.open method, taking a filename and outputting some ROOT
+    object that has branches
+    """
     data = up.open(filename)
     if not isabs(filename):
         raise OSError("Please provide an absolute file path")
@@ -23,8 +26,8 @@ def load_ntuple(filename: str) -> HasBranches:
         raise TypeError("please read a TTree using the ':' separator.")
 
 
-def get_POT(filename: str):
-    """sums the POT value of each subrun from a"""
+def get_POT(filename: str) -> float:
+    """Sums the POT value of each subrun from a given ROOT file"""
     if not isabs(filename):
         raise OSError("Please provide an absolute file path")
     data = up.open(filename)
