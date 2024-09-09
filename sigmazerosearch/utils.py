@@ -20,6 +20,7 @@ def _save_plot(config: Config, fig: Figure, title: str):
             fig.savefig(
                 pathlib.Path(config.plot_dir / f"{title}.{format}"),
                 dpi=300,
+                bbox_inches="tight",
             )
             logging.info(
                 "saved plot to %s", pathlib.Path(config.plot_dir / f"{title}.{format}")
@@ -28,6 +29,7 @@ def _save_plot(config: Config, fig: Figure, title: str):
         fig.savefig(
             pathlib.Path(config.plot_dir / f"{title}.{config.plot_format}"),
             dpi=300,
+            bbox_inches="tight",
         )
         logging.info(
             "saved plot to %s",
