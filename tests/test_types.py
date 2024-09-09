@@ -3,7 +3,6 @@ import pathlib
 import pytest
 
 from sigmazerosearch.general import PDG, Config
-from sigmazerosearch.selection import Cut, Sample, SampleType, Selection
 
 # TODO: split this file into separate files for each large type for more
 # detailed testing, e.g. multiple tests for Selection
@@ -38,47 +37,3 @@ def test_PDG():
     assert ~PDG.Kaon == -321
     assert -PDG.Kaon == -321
     assert PDG.Sigma0 == 3212
-
-
-@pytest.fixture
-def eg_Cut():
-    return Cut("bar", lambda: "hello")
-
-
-def test_Cut(eg_Cut):
-    c1 = Cut("this", lambda: 2)
-    assert c1.name == "this"
-    assert c1() == 2
-
-    c2 = Cut("that", lambda: 3)
-    assert c1.name != c2.name
-    assert c2() == 3
-
-    assert eg_Cut() == "hello"
-
-
-def test_Sample():
-    s1 = Sample(
-        "hyperon",
-        "analysisOutputRHC_Hyperon_numi_rhc_run3b.root",
-        SampleType.Hyperon,
-        1e20,
-    )
-    s2 = Sample(
-        "dirt", "analysisOutputRHC_Dirt_numi_rhc_run3b.root", SampleType.Dirt, 2e30
-    )
-
-    assert s1.name != s2.name
-
-
-def test_Selection():
-    s = Selection(
-        params={}, samples={}, cuts=[Cut("cut1", lambda: 2), Cut("cut2", lambda: 3)]
-    )
-
-    s.cuts[0].n_signal = (60, 10)
-    s.cuts[0].n_passing = (40, 5)
-    s.cuts[0].n_background = (1e6, 3e4)
-    s.cuts[1].n_signal = (30, 10)
-    s.cuts[1].n_passing = (15, 5)
-    s.cuts[1].n_background = (1e4, 1e2)

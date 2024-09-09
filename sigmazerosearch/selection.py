@@ -2,7 +2,7 @@
 Selection contains the main objects for handling the physics selection.
 """
 
-from enum import Enum
+from enum import Enum, IntEnum
 from os.path import isabs
 from typing import Callable
 
@@ -25,45 +25,48 @@ lower) associated error.
 """
 
 
-class EventCategory:
-    @staticmethod
-    def Signal(arr: ak.Array) -> ak.Array:
-        return signal_def(arr)
+class EventCategory(IntEnum):
+    Signal = 0
+    Lambda = 1
+    NuMuCC = 2
+    NC = 3
+    Other = 4
 
     @staticmethod
-    def Lambda(arr: ak.Array) -> ak.Array:
-        return arr["mc_hyperon_pdg"] == PDG.Lambda.value  # type: ignore
+    def _signal(arr):
+        return signal_def(arr) * EventCategory.Signal.value
 
     @staticmethod
-    def NuMuCC(arr: ak.Array) -> ak.Array:
-        return np.logical_and.reduce(
-            [
-                np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
-                np.abs(arr["mc_lepton_pdg"]) == PDG.Muon.value,
-            ]
-        )
+    def _lambda(arr):
+        return (arr["mc_hyperon_pdg"] == PDG.Lambda.value) * EventCategory.Lambda.value
 
     @staticmethod
-    def NC(arr: ak.Array) -> ak.Array:
-        return np.logical_and.reduce(
-            [
-                np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
-                np.abs(arr["mc_lepton_pdg"]) == PDG.NuMu.value,
-            ]
-        )  # type: ignore
-
-    @staticmethod
-    def Other(arr: ak.Array) -> ak.Array:
-        return np.logical_and.reduce(
-            np.logical_not(
+    def _numucc(arr):
+        return (
+            np.logical_and.reduce(
                 [
-                    EventCategory.Signal(arr),
-                    EventCategory.Lambda(arr),
-                    EventCategory.NuMuCC(arr),
-                    EventCategory.NC(arr),
+                    np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
+                    np.abs(arr["mc_lepton_pdg"]) == PDG.Muon.value,
                 ]
             )
+            * EventCategory.NuMuCC.value
         )
+
+    @staticmethod
+    def _nc(arr):
+        return (
+            np.logical_and.reduce(
+                [
+                    np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
+                    np.abs(arr["mc_lepton_pdg"]) == PDG.NuMu.value,
+                ]
+            )
+            * EventCategory.NC.value
+        )
+
+    @classmethod
+    def from_arr(cls, arr):
+        return cls._signal(arr) | cls._lambda(arr) | cls._numucc(arr) | cls._nc(arr)
 
 
 def signal_def(arr: ak.Array) -> ak.Array:
