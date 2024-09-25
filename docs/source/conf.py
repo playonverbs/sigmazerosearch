@@ -18,6 +18,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
     "sphinx.ext.viewcode",
+    "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "autodoc2",
@@ -26,6 +27,7 @@ extensions = [
 myst_enable_extensions = [
     "colon_fence",
     "deflist",
+    "fieldlist",
     "dollarmath",
     "smartquotes",
     "strikethrough",
@@ -60,7 +62,7 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
+    "python": ("https://docs.python.org/3.10", None),
     "uproot": ("https://uproot.readthedocs.io/en/latest", None),
     "awkward-array": ("https://awkward-array.org/doc/stable", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
