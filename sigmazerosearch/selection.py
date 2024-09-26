@@ -15,10 +15,11 @@ from uproot.behaviors.TBranch import HasBranches
 import sigmazerosearch.alg.fv as fv
 import sigmazerosearch.utils as utils
 from sigmazerosearch.general import PDG, Config
-from sigmazerosearch.loader import get_POT, load_ntuple
+from sigmazerosearch.loader import _yield_array_from_ttree, get_POT, load_ntuple
 from sigmazerosearch.truth import GenType
 
-ValueUnc = tuple[float, float] | tuple[float, float, float]
+# ValueUnc = tuple[float, float] | tuple[float, float, float]
+ValueUnc = list[float]
 """
 ValueUnc represents a central value with either a symmetric or (upper,
 lower) associated error.
@@ -93,9 +94,9 @@ class Cut:
     def __init__(self, name: str, cutfunc: Callable):
         self.name: str = name
         self.cutfunc: Callable[[ak.Array], ak.Array] = cutfunc
-        self.n_passing: ValueUnc = (0.0, 0.0, 0.0)
-        self.n_signal: ValueUnc = (0.0, 0.0, 0.0)
-        self.n_background: ValueUnc = (0.0, 0.0, 0.0)
+        self.n_passing: ValueUnc = [0.0, 0.0, 0.0]
+        self.n_signal: ValueUnc = [0.0, 0.0, 0.0]
+        self.n_background: ValueUnc = [0.0, 0.0, 0.0]
         self.applied: bool = False
 
     def eff(self) -> float:
@@ -105,6 +106,11 @@ class Cut:
     def pur(self) -> float:
         """Calculate the selection purity at the current Cut"""
         return self.n_signal[0] / self.n_passing[0]
+
+    def update(self, arr, cond):
+        self.n_signal[0] += ak.sum(signal_def(arr[cond]))
+        self.n_background[0] += ak.sum(~signal_def(arr[cond]), axis=None)
+        self.n_passing[0] += ak.sum(cond, axis=None)
 
     def __call__(self, *args):
         """Allow an instance of Cut to be used like its cutfunc"""
@@ -205,18 +211,17 @@ class Selection:
                 continue
             for s in self.samples:
                 if isinstance(s.df, HasBranches):
-                    arr = s.df.arrays(self.config.branch_list)
-                    if Cut.total_signal == 0.0:
-                        Cut.total_signal = ak.sum(signal_def(arr), axis=None)  # type: ignore
-                    cond = np.logical_and.reduce(
-                        [c.cutfunc(arr) for c in self.cuts[: i + 1]]
-                    )
-                    arr = arr[cond]
-                    cut.n_signal = (ak.sum(signal_def(arr), axis=None), 0, 0)  # type: ignore
-                    cut.n_background = (ak.sum(~signal_def(arr), axis=None), 0, 0)  # type: ignore
-                    cut.n_passing = (ak.sum(cond, axis=None), 0, 0)  # type: ignore
+                    # arr = s.df.arrays(self.config.branch_list)
+                    for arr in _yield_array_from_ttree(s.df, self.config):
+                        # only count total signal for the initial cut
+                        if i == 0:
+                            Cut.total_signal += ak.sum(signal_def(arr), axis=None)  # type: ignore
+                        cond = np.logical_and.reduce(
+                            [c.cutfunc(arr) for c in self.cuts[: i + 1]]
+                        )
+                        cut.update(arr, cond)
+                    # return arr
                     cut.applied = True
-                    return arr
                 else:
                     raise TypeError(f"sample {s.file_name} has not been loaded")
 

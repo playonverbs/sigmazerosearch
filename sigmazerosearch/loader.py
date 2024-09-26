@@ -11,6 +11,16 @@ import awkward as ak
 import uproot as up
 from uproot.behaviors.TBranch import HasBranches
 
+from sigmazerosearch.general import Config
+
+
+def _yield_array_from_ttree(tree: HasBranches, config: Config):
+    # if config.iterate:
+    for arr in tree.iterate(step_size=config.iterate_step, report=None):  # type: ignore
+        yield arr
+    # else:
+    #     return tree.arrays(config.branch_list)
+
 
 def load_ntuple(filename: str) -> HasBranches:
     """

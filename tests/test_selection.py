@@ -3,7 +3,13 @@ import numpy as np
 import pytest
 import uproot as up
 
-from sigmazerosearch.selection import Cut, EventCategory, Sample, SampleType, Selection
+from sigmazerosearch.selection import (
+    Cut,
+    EventCategory,
+    Sample,
+    SampleType,
+    Selection,
+)
 
 
 @pytest.fixture(
@@ -15,7 +21,7 @@ from sigmazerosearch.selection import Cut, EventCategory, Sample, SampleType, Se
 def event_sample(request):
     entry_low, entry_high = request.param
     with up.open(
-        "/home/niam/phd/data/hyperons/multiSlice/run3b_RHC/analysisOutputRHC_mSlice_ctslice_cthorpe_make_hyperon_events_numi_rhc_run3b_hyperon_reco2_reco2.root"
+        "/home/niam/phd/data/hyperons/multiSlice/run3b_RHC/analysisOutputRHC_mSlice_cthorpe_make_hyperon_events_numi_rhc_run3b_hyperon_reco2_reco2.root"
     ) as fd:
         return fd.get("ana/OutputTree").arrays(
             entry_start=entry_low, entry_stop=entry_high
