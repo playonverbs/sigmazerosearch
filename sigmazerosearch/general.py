@@ -20,6 +20,8 @@ class Config:
     plot_dir: Path | None = None
     plot_format: str | Iterable[str] = "png"
     branch_list: Iterable[str] | None = None
+    iterate: bool = False
+    iterate_step: int | str | None = None
 
     def __post_init__(self):
         self.validate()
@@ -40,6 +42,12 @@ class Config:
 
         if self.plot_dir is not None and not self.plot_dir.is_dir():
             raise ValueError("plot_dir should be a path to a directory")
+
+        if self.iterate and self.iterate_step is None:
+            raise ValueError("iterate should be set with iterate_step")
+
+        if not self.iterate and self.iterate_step is not None:
+            raise ValueError("iterate should be set with iterate_step")
 
 
 class PDG(IntEnum):

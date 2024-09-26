@@ -4,9 +4,6 @@ import pytest
 
 from sigmazerosearch.general import PDG, Config
 
-# TODO: split this file into separate files for each large type for more
-# detailed testing, e.g. multiple tests for Selection
-
 
 @pytest.fixture
 def default_Config():
@@ -25,6 +22,15 @@ def test_Config(default_Config):
 
     with pytest.raises(Exception):
         Config(plot_save=True, plot_dir=pathlib.Path("./test_utils.py"))
+
+    with pytest.raises(Exception):
+        Config(iterate=False, iterate_step=100)
+
+    with pytest.raises(Exception):
+        Config(iterate=True, iterate_step=None)
+
+    with pytest.raises(Exception):
+        Config(iterate=False, iterate_step="1 MB")
 
 
 def test_PDG():
