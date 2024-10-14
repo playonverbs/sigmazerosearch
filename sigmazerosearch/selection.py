@@ -2,6 +2,7 @@
 Selection contains the main objects for handling the physics selection.
 """
 
+from dataclasses import dataclass
 from enum import Enum, IntEnum
 from os.path import isabs
 from typing import Callable
@@ -125,9 +126,27 @@ class Cut:
         return True
 
 
-# TODO: assign to real type representing a set of parameters, gets passed into
-# functions that require a tweakable parameters
-ParameterSet = dict[str, bool | float | int]  # STUB
+@dataclass(frozen=True)
+class ParameterSet:
+    """
+    Wraps all selection parameter values.
+
+    All parameters are required even if only a subset of selection cuts are
+    chosen.
+    """
+
+    max_separation: float
+    min_length: float
+    pid_cut: float
+    proton_pid_cut: float
+    pion_pid_cut: float
+    separation_cut: float
+    w_lambda_min: float
+    w_lambda_max: float
+
+    @staticmethod
+    def from_dict(kwargs):
+        return ParameterSet(**kwargs)
 
 
 class SampleType(Enum):
@@ -191,7 +210,7 @@ class SampleSet(list[Sample]):
 
 class Selection:
     def __init__(self, **kwargs):
-        self.parameters: ParameterSet = ParameterSet(kwargs["params"])
+        self.parameters: ParameterSet = kwargs["params"]
         self.samples: SampleSet = kwargs["samples"]
         self.cuts: list[Cut] = kwargs["cuts"]
         self.label: str = "_" + kwargs["label"] if kwargs.get("label") else ""
