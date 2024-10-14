@@ -98,6 +98,7 @@ class Cut:
         self.n_signal: ValueUnc = [0.0, 0.0, 0.0]
         self.n_background: ValueUnc = [0.0, 0.0, 0.0]
         self.applied: bool = False
+        Cut.total_signal = 0.0
 
     def eff(self) -> float:
         """Calculate the selection efficiency at the current Cut"""
@@ -107,10 +108,10 @@ class Cut:
         """Calculate the selection purity at the current Cut"""
         return self.n_signal[0] / self.n_passing[0]
 
-    def update(self, arr, cond):
-        self.n_signal[0] += ak.sum(signal_def(arr[cond]))
-        self.n_background[0] += ak.sum(~signal_def(arr[cond]), axis=None)
-        self.n_passing[0] += ak.sum(cond, axis=None)
+    def update(self, arr, cond, scale=1.0):
+        self.n_signal[0] += scale * ak.sum(signal_def(arr[cond]))
+        self.n_background[0] += scale * ak.sum(~signal_def(arr[cond]), axis=None)
+        self.n_passing[0] += scale * ak.sum(cond, axis=None)
 
     def __call__(self, *args):
         """Allow an instance of Cut to be used like its cutfunc"""
@@ -202,25 +203,24 @@ class Selection:
         Apply a given selection cut's cut function to the sample arrays and
         accumulates the resulting number of signal, background and total
         passing particles per cut.
-
-        Returns the destructively masked array after cut conditions have been
-        applied.
         """
         for i, cut in enumerate(self.cuts):
             if cut.name != cutname:
                 continue
             for s in self.samples:
                 if isinstance(s.df, HasBranches):
+                    scale = self.samples.target_POT / s.POT
                     # arr = s.df.arrays(self.config.branch_list)
                     for arr in _yield_array_from_ttree(s.df, self.config):
                         # only count total signal for the initial cut
                         if i == 0:
-                            Cut.total_signal += ak.sum(signal_def(arr), axis=None)  # type: ignore
+                            Cut.total_signal += scale * ak.sum(
+                                signal_def(arr), axis=None
+                            )  # type: ignore
                         cond = np.logical_and.reduce(
                             [c.cutfunc(arr) for c in self.cuts[: i + 1]]
                         )
-                        cut.update(arr, cond)
-                    # return arr
+                        cut.update(arr, cond, scale=scale)
                     cut.applied = True
                 else:
                     raise TypeError(f"sample {s.file_name} has not been loaded")
