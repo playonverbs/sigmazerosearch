@@ -14,7 +14,16 @@ from sigmazerosearch.selection import (
     Selection,
 )
 
-pset = ParameterSet({"pid_cut": 0.6, "min_length": 10, "max_separation": 1})
+pset = ParameterSet(
+    pid_cut=0.6,
+    min_length=10,
+    max_separation=1,
+    proton_pid_cut=0.2,
+    pion_pid_cut=0.2,
+    separation_cut=3,
+    w_lambda_min=1.1,
+    w_lambda_max=1.20,
+)
 
 sel = Selection(
     cuts=[
