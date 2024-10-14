@@ -67,6 +67,7 @@ intersphinx_mapping = {
     "awkward-array": ("https://awkward-array.org/doc/stable", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
     "hist": ("https://hist.readthedocs.io/en/latest", None),
+    "vector": ("https://vector.readthedocs.io/en/latest", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
