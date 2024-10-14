@@ -16,7 +16,7 @@ well-known particle physics terminology.
 
 The input `Sample` files to this framework are produced by the
 HyperonProduction LArSoft analyser located at
-https://github.com/playonverbs/HyperonProduction.
+<https://github.com/playonverbs/HyperonProduction>.
 
 An occasionally-updated spec for the input files is available
 [here](https://hep.lancs.ac.uk/hedgedoc/s/FkkYg14yW).
