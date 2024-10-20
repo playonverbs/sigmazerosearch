@@ -6,7 +6,13 @@ from sigmazerosearch.utils import displacement
 
 def select_mu_candidate(arr: ak.Array, pset: ParameterSet) -> ak.Array:
     """
-    Apply conditions for a muon ID cut with parameters passed in via dict.
+    Apply conditions for a muon ID cut using parameters.
+
+    Parameters used:
+
+    1. Muon PID cut: <project:#ParameterSet.pid_cut>
+    2. Minimum length: <project:#ParameterSet.min_length>
+    3. Max separation: <project:#ParameterSet.max_separation>
     """
     mask = (
         (arr["trk_llrpid"] < pset.pid_cut)
