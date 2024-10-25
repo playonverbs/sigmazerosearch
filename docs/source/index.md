@@ -20,22 +20,27 @@ This project aims to:
 - Characterise both track and shower-like objects identified with the Pandora
   multi-algorithm pattern recognition framework.
 - Provide reusuability beyond MicroBooNE-specific tooling -- looking
-  towards near and future experiments using the LArSoft Liquid Argon Software
-  framework.
+  towards near and future experiments using the
+  {abbr}`LArSoft (Liquid Argon Software)` framework.
 
-> The author is grateful for and takes inspiration from
-> <github:cthorpe123/HyperonAnalysis>.
+```{card}
+:link: https://github.com/cthorpe123/HyperonAnalysis
+
+The author is grateful for and takes inspiration from
+<github:cthorpe123/HyperonAnalysis>.
+```
 
 ---
 
 This project currently supports Python 3.10, more information on the supporting
-packages is available in <project:#dependencies>
+packages is available in <project:#dependencies>.
 
 ```{toctree}
 :maxdepth: 2
 :caption: Contents:
 :hidden:
 
+usage
 dependencies
 api/index
 ```

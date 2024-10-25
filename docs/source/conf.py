@@ -22,6 +22,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
     "autodoc2",
+    "sphinx_design",
 ]
 
 myst_enable_extensions = [
@@ -31,6 +32,7 @@ myst_enable_extensions = [
     "dollarmath",
     "smartquotes",
     "strikethrough",
+    "replacements",
 ]
 
 myst_url_schemes = {

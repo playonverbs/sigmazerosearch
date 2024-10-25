@@ -136,13 +136,18 @@ class ParameterSet:
     """
 
     max_separation: float
+    """Units: cm"""
     min_length: float
+    """Units: cm"""
     pid_cut: float
     proton_pid_cut: float
     pion_pid_cut: float
     separation_cut: float
+    """Units: cm"""
     w_lambda_min: float
+    """Units: GeV"""
     w_lambda_max: float
+    """Units: GeV"""
 
     @staticmethod
     def from_dict(kwargs):
@@ -150,13 +155,21 @@ class ParameterSet:
 
 
 class SampleType(Enum):
-    """Represents different types of samples being fed into the selection"""
+    """
+    Represents different types of samples being fed into the selection, both
+    Monte-Carlo (simulated) files and directly recorded files.
+    """
 
     Data = 0
+    """Produced from files recorded from the detector."""
     Background = 1
+    """Combined Background MC."""
     Hyperon = 2
+    """All enriched hyperon interactions."""
     Dirt = 3
+    """Out of TPC interactions."""
     Ext = 4
+    """Interactions originating from cosmic origins."""
 
 
 class Sample:
