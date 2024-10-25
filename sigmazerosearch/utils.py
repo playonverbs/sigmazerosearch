@@ -57,8 +57,8 @@ def npfp(arr, opt: str | None = None) -> ak.Array:
 
 def displacement(arr, x_i, y_i, z_i) -> ak.Array:
     """
-    Compute displacement array from given x,y,z array indices to
-    reco_primary_vtx
+    Compute displacement array from given `x,y,z` array indices to
+    `reco_primary_vtx` equivalents.
     """
     v = vector.zip(
         {
@@ -97,9 +97,9 @@ def filter_by_rse(arr: ak.Array, run: int, subrun: int, event: int) -> ak.Array:
 
 def print_rse(arr: ak.Array, file=sys.stdout):
     """
-    Print the event details in the format "run subrun event",
-    the file parameter can be used to pipe this output to a file
-    (useful for filtering upstream).
+    Print the event details in the format `run subrun event`, the `file`
+    parameter can be used to pipe this output to a file (useful for filtering
+    upstream).
     """
     for elem in arr:
         print(f"{elem.run} {elem.subrun} {elem.event}", file=file)  # type: ignore
@@ -108,8 +108,9 @@ def print_rse(arr: ak.Array, file=sys.stdout):
 
 def file_ok(filename: str, mode: str = "read") -> bool:
     """
-    Test file for read/write availability and convert Exceptions to boolean
-    Defaults to checking for read availability
+    Test file for read/write availability and convert Exceptions to boolean.
+
+    Defaults to checking for read availability.
     """
     try:
         fp = open(filename) if mode == "read" else open(filename, "w")
