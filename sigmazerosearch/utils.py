@@ -80,6 +80,38 @@ def displacement(arr, x_i, y_i, z_i) -> ak.Array:
     return ak.mask(res, ak.num(res) != 0)  # type: ignore
 
 
+def separation(
+    arr_i: ak.Array,
+    arr_j: ak.Array,
+    index: str,
+    suffixes: list[str] = ["x", "y", "z"],
+) -> ak.Array:
+    """
+    Compute the separation between two <inv:#ak.Array> subsets using the
+    partial field name `index` + `suffixes`.
+    """
+
+    v = vector.zip(
+        {
+            "x": arr_i[index + suffixes[0]],
+            "y": arr_i[index + suffixes[1]],
+            "z": arr_i[index + suffixes[2]],
+        }
+    )
+
+    u = vector.zip(
+        {
+            "x": arr_j[index + suffixes[0]],
+            "y": arr_j[index + suffixes[1]],
+            "z": arr_j[index + suffixes[2]],
+        }
+    )
+
+    res = (v - u).mag
+
+    return res.mask[ak.num(res) != 0]
+
+
 def filter_by_rse(arr: ak.Array, run: int, subrun: int, event: int) -> ak.Array:
     """
     Takes an array and either three numbers corresponding to run, subrun, event
