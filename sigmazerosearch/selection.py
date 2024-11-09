@@ -90,8 +90,6 @@ def signal_def(arr: ak.Array) -> ak.Array:
 class Cut:
     """Cut represents a single selection cut and the selection state for it."""
 
-    total_signal = 0.0
-
     def __init__(self, name: str, cutfunc: Callable):
         self.name: str = name
         self.cutfunc: Callable[[ak.Array], ak.Array] = cutfunc
@@ -99,7 +97,7 @@ class Cut:
         self.n_signal: ValueUnc = [0.0, 0.0, 0.0]
         self.n_background: ValueUnc = [0.0, 0.0, 0.0]
         self.applied: bool = False
-        Cut.total_signal = 0.0
+        self.total_signal: float = 0.0
 
     def eff(self) -> float:
         """Calculate the selection efficiency at the current Cut"""
@@ -109,8 +107,9 @@ class Cut:
         """Calculate the selection purity at the current Cut"""
         return self.n_signal[0] / self.n_passing[0]
 
-    def update(self, arr, cond, scale=1.0):
-        self.n_signal[0] += scale * ak.sum(signal_def(arr[cond]))
+    def update(self, arr, cond, scale: float = 1.0, sample=None):
+        if sample and sample.type == SampleType.Hyperon:
+            self.n_signal[0] += scale * ak.sum(signal_def(arr[cond]))
         self.n_background[0] += scale * ak.sum(~signal_def(arr[cond]), axis=None)
         self.n_passing[0] += scale * ak.sum(cond, axis=None)
 
@@ -230,30 +229,23 @@ class Selection:
         self.config: Config = kwargs.get("config", Config.default())
         self.config.validate()
 
-    def apply_cut(self, cutname: str):
+    def apply_cut(self, cuts: list[Cut]):
         """
         Apply a given selection cut's cut function to the sample arrays and
         accumulates the resulting number of signal, background and total
         passing particles per cut.
         """
-        for i, cut in enumerate(self.cuts):
-            if cut.name != cutname:
-                continue
-            for s in self.samples:
+        for s in self.samples:
+            scale = self.samples.target_POT / s.POT
+            for i, cut in enumerate(cuts):
                 if isinstance(s.df, HasBranches):
-                    scale = self.samples.target_POT / s.POT
-                    # arr = s.df.arrays(self.config.branch_list)
                     for arr in _yield_array_from_ttree(s.df, self.config):
-                        # only count total signal for the initial cut
-                        if i == 0:
-                            Cut.total_signal += scale * ak.sum(
+                        if s.type == SampleType.Hyperon:
+                            cut.total_signal += scale * ak.sum(
                                 signal_def(arr), axis=None
-                            )  # type: ignore
-                        cond = np.logical_and.reduce(
-                            [c.cutfunc(arr) for c in self.cuts[: i + 1]]
-                        )
-                        cut.update(arr, cond, scale=scale)
-                    cut.applied = True
+                            )
+                        cond = np.logical_and.reduce([c(arr) for c in cuts[: i + 1]])
+                        cut.update(arr, cond, scale=scale, sample=s)
                 else:
                     raise TypeError(f"sample {s.file_name} has not been loaded")
 

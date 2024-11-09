@@ -74,14 +74,7 @@ def main():
     for sam in sel.samples:
         print(sam.file_name.split("/")[-1], sam.type.name, sam.POT, sep="\t")
 
-    print()
-
-    for n, cut in enumerate(sel.cuts):
-        print(f"Applying {n}. {cut.name} Cut\t", end="", flush=True)
-        sel.apply_cut(cut.name)
-        print("...Applied cut")
-
-    print()
+    sel.apply_cut(sel.cuts)
 
     sel.cut_summary(header=True, format="md")
 
