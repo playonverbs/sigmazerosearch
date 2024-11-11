@@ -124,6 +124,9 @@ class Cut:
 
         return True
 
+    def __repr__(self) -> str:
+        return f"<Cut name={self.name} passing={self.n_passing} signal={self.n_signal} background={self.n_background}>"
+
 
 @dataclass(frozen=True)
 class ParameterSet:
@@ -209,6 +212,9 @@ class Sample:
             return False
 
         return True
+
+    def __repr__(self) -> str:
+        return f"<Sample name={self.name} file={self.file_name} type={self.type.name} gen={self.gen_type.name} POT={self.POT}>"
 
 
 class SampleSet(list[Sample]):
@@ -304,10 +310,10 @@ class Selection:
                 names, effs, label="efficiency", color="tab:blue", marker="o"
             )
             ax2 = ax.twinx()
-            (p,) = ax2.plot(names, purs, label="purity", color="tab:orange", marker="o")
+            (p,) = ax2.plot(names, purs, label="purity", color="tab:orange", marker="^")
             ax.set_ylabel("Efficiency")
             ax2.set_ylabel("Purity")
-            ax.legend([e, p], ["Efficiency", "Purity"])
+            ax.legend([e, p], ["Efficiency", "Purity"], loc="right")
 
         fig.tight_layout()
         if self.config.plot_save:
@@ -407,7 +413,7 @@ class Selection:
                     ],
                     headers=headers,
                     tablefmt=format,
-                    floatfmt=("", "", "", ".5f", ".5f"),
+                    floatfmt=("", ".2f", ".2f", ".5f", ".5f"),
                 )
             )
 
@@ -419,7 +425,7 @@ class Selection:
             print_table("latex")
         elif format == "csv":
             header_row = "{:<},{:>},{:>},{:>},{:>}"
-            row = "{:<},{:>},{:>},{:>.5f},{:>.5f}"
+            row = "{:<},{:>.2f},{:>.2f},{:>.5f},{:>.5f}"
             if header:
                 print(
                     header_row.format(
