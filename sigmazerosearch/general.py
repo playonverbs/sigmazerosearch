@@ -19,6 +19,7 @@ class Config:
     plot_save: bool = False
     plot_dir: Path | None = None
     plot_format: str | Iterable[str] = "png"
+    perf_percent: bool = False
     branch_list: Iterable[str] | None = None
     iterate: bool = False
     iterate_step: int | str | None = None
