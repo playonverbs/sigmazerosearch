@@ -306,13 +306,25 @@ class Selection:
                 marker="o",
             )
         else:
+            # change to percentage if flag set
+            effs = [eff * 100 for eff in effs] if self.config.perf_percent else effs
+            purs = [pur * 100 for pur in purs] if self.config.perf_percent else purs
+
             (e,) = ax.plot(
                 names, effs, label="efficiency", color="tab:blue", marker="o"
             )
             ax2 = ax.twinx()
             (p,) = ax2.plot(names, purs, label="purity", color="tab:orange", marker="^")
-            ax.set_ylabel("Efficiency")
-            ax2.set_ylabel("Purity")
+            ax.set_ylabel(
+                "Efficiency{percent}".format(
+                    percent=" [%]" if self.config.perf_percent else ""
+                )
+            )
+            ax2.set_ylabel(
+                "Purity{percent}".format(
+                    percent=" [%]" if self.config.perf_percent else ""
+                )
+            )
             ax.legend([e, p], ["Efficiency", "Purity"], loc="right")
 
         fig.tight_layout()
@@ -406,8 +418,8 @@ class Selection:
                             cut.name,
                             cut.n_signal[0],
                             cut.n_background[0],
-                            cut.eff(),
-                            cut.pur(),
+                            cut.eff() * 100 if self.config.perf_percent else cut.eff(),
+                            cut.pur() * 100 if self.config.perf_percent else cut.pur(),
                         ]
                         for cut in self.cuts
                     ],
