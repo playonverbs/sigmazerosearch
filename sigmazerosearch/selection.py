@@ -243,8 +243,8 @@ class Selection:
         """
         for s in self.samples:
             scale = self.samples.target_POT / s.POT
-            for i, cut in enumerate(cuts):
-                if isinstance(s.df, HasBranches):
+            if isinstance(s.df, HasBranches):
+                for i, cut in enumerate(cuts):
                     for arr in _yield_array_from_ttree(s.df, self.config):
                         if s.type == SampleType.Hyperon:
                             cut.total_signal += scale * ak.sum(
@@ -252,8 +252,8 @@ class Selection:
                             )
                         cond = np.logical_and.reduce([c(arr) for c in cuts[: i + 1]])
                         cut.update(arr, cond, scale=scale, sample=s)
-                else:
-                    raise TypeError(f"sample {s.file_name} has not been loaded")
+            else:
+                raise TypeError(f"sample {s.file_name} has not been loaded")
 
     def plot_reco_effs(self, signal=True) -> None:
         pdgs = [PDG.Photon.value, PDG.Proton.value, PDG.Pi.anti, PDG.Muon.anti]
