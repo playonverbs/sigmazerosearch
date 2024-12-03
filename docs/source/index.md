@@ -43,6 +43,8 @@ packages is available in <project:#dependencies>.
 usage
 dependencies
 api/index
+larsoft
+ntuples
 ```
 
 ```{toctree}
