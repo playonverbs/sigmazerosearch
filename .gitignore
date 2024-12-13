@@ -166,4 +166,5 @@ tags
 #.idea/
 
 # hid plotting outputs used while iteratively building on the framework
-plots/
+plots/*
+!plots/*.mplstyle
