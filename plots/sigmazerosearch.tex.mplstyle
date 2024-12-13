@@ -1,0 +1,4 @@
+text.usetex : true
+font.family : "serif"
+font.size : 14
+axes.titlelocation : "right"
