@@ -70,6 +70,8 @@ class PDG(IntEnum):
     Proton = 2212
     Lambda = 3122
     Sigma0 = 3212
+    SigmaM = 3112
+    SigmaP = 3222
 
     @property
     def anti(self) -> int:
