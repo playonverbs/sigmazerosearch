@@ -5,7 +5,7 @@ Selection contains the main objects for handling the physics selection.
 from dataclasses import dataclass
 from enum import IntEnum
 from os.path import isabs
-from typing import Callable
+from typing import Callable, Optional
 
 import awkward as ak
 import matplotlib.pyplot as plt
@@ -253,12 +253,16 @@ class Selection:
         self.config: Config = kwargs.get("config", Config.default())
         self.config.validate()
 
-    def apply_cut(self, cuts: list[Cut]):
+    def apply_cut(
+        self, cuts: list[Cut], accumulate: bool = False
+    ) -> Optional[ak.Array]:
         """
         Apply a given selection cut's cut function to the sample arrays and
         accumulates the resulting number of signal, background and total
         passing particles per cut.
         """
+
+        accum = ak.Array([]) if accumulate else None
         for s in self.samples:
             scale = self.samples.target_POT / s.POT
             if isinstance(s.df, HasBranches):
@@ -270,8 +274,19 @@ class Selection:
                             )
                         cond = np.logical_and.reduce([c(arr) for c in cuts[: i + 1]])
                         cut.update(arr, cond, scale=scale, sample=s)
+
+                        filter_arr = arr[cond]
+
+                        # build array only for the last cut (avoid double-counting)
+                        if accumulate and (i == len(cuts) - 1):
+                            filter_arr["sample"] = s.type.name
+                            filter_arr["cut"] = cut.name
+                            accum = ak.concatenate((accum, filter_arr), axis=0)
             else:
                 raise TypeError(f"sample {s.file_name} has not been loaded")
+
+        if accumulate:
+            return accum
 
     def plot_reco_effs(self, signal=True) -> None:
         pdgs = [PDG.Photon.value, PDG.Proton.value, PDG.Pi.anti, PDG.Muon.anti]
