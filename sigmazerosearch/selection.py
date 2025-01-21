@@ -3,7 +3,7 @@ Selection contains the main objects for handling the physics selection.
 """
 
 from dataclasses import dataclass
-from enum import Enum, IntEnum
+from enum import IntEnum
 from os.path import isabs
 from typing import Callable
 
@@ -156,7 +156,7 @@ class ParameterSet:
         return ParameterSet(**kwargs)
 
 
-class SampleType(Enum):
+class SampleType(IntEnum):
     """
     Represents different types of samples being fed into the selection, both
     Monte-Carlo (simulated) files and directly recorded files.
@@ -224,6 +224,24 @@ class SampleSet(list[Sample]):
         super().__init__(samples)
         self.target_POT: float | None = kwargs.get("target_POT")
         # self.base_dir: str = kwargs["base_dir"] if kwargs["base_dir"] else "."
+
+    def as_table(self, file=None):
+        """
+        Print samples and the target POT in a tabular form.
+        """
+        print(f"target_POT = {self.target_POT} POT")
+        print(
+            tabulate(
+                [
+                    [sam.file_name.split("/")[-1], sam.type.name, sam.POT]
+                    for sam in self
+                ],
+                ["filename", "type", "POT"],
+                tablefmt="rounded_outline",
+                showindex="always",
+            ),
+            file=file,
+        )
 
 
 class Selection:
