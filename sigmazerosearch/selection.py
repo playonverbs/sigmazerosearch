@@ -329,7 +329,7 @@ class Selection:
         purs: list[float] = [c.pur() for c in self.cuts]
 
         fig, ax = plt.subplots()
-        ax.set_title("Selection Performance", loc="right", color="grey", weight="bold")
+        ax.set_title("Selection Performance", loc="right", weight="bold")
         if exp:
             ax.set_ylabel(r"$\epsilon p$")
             ax.plot(
@@ -358,7 +358,7 @@ class Selection:
                     percent=" [%]" if self.config.perf_percent else ""
                 )
             )
-            ax.legend([e, p], ["Efficiency", "Purity"], loc="right")
+            ax.legend([e, p], ["Efficiency", "Purity"], loc="upper center")
 
         fig.tight_layout()
         if self.config.plot_save:
