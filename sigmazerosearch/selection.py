@@ -2,7 +2,7 @@
 Selection contains the main objects for handling the physics selection.
 """
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import IntEnum
 from os.path import isabs
 from typing import Callable, Optional
@@ -154,6 +154,19 @@ class ParameterSet:
     @staticmethod
     def from_dict(kwargs):
         return ParameterSet(**kwargs)
+
+    def as_table(self, file=None):
+        """
+        Print this ParameterSet in a tabular form
+        """
+        print(
+            tabulate(
+                asdict(self),
+                tablefmt="rounded_outline",
+                showindex="always",
+            ),
+            file=file,
+        )
 
 
 class SampleType(IntEnum):

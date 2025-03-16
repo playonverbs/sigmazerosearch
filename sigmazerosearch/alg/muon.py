@@ -14,6 +14,7 @@ def select_mu_candidate(arr: ak.Array, pset: ParameterSet) -> ak.Array:
     2. Minimum length: <project:#ParameterSet.min_length>
     3. Max separation: <project:#ParameterSet.max_separation>
     """
+    # XXX: Check that this works for one pfp that satisfies all conditions
     mask = (
         (arr["trk_llrpid"] < pset.pid_cut)
         & (arr["trk_length"] < pset.min_length)
