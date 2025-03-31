@@ -70,6 +70,7 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable", None),
     "hist": ("https://hist.readthedocs.io/en/latest", None),
     "vector": ("https://vector.readthedocs.io/en/latest", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
 }
 
 # -- Options for HTML output -------------------------------------------------

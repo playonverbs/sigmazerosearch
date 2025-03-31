@@ -9,9 +9,6 @@ Submodules are organised by what problems they aim to solve:
 
 - `fv`: provides a fiducial volume cut and some other definitions regarding the
   detector geometry.
-- `muon`: provides methods of selecting a muon-like object
-
-:::{admonition}
-`stats`: will provide statistical treatments for the analysis.
-:::
+- `muon`: provides methods of selecting a muon-like object.
+- `lamb`: methods for selecting the $\Lambda \\rightarrow p + \pi^-$ subsystem.
 """
