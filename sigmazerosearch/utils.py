@@ -14,6 +14,44 @@ from matplotlib.figure import Figure
 from sigmazerosearch.general import Config
 
 
+class WireGeometry:
+    """
+    A suite of methods to convert from MicroBooNE detector coordinates to
+    wire,time coordinates for each anode plane.
+    """
+
+    A_W = 3.33328
+    C_U = 338.140
+    C_V = 2732.53
+    C_Y = 4799.19
+    A_T = 18.2148
+    C_T = 818.351
+
+    cos60 = 0.5
+    sin60 = np.sqrt(3) / 2.0
+
+    @classmethod
+    def pos_to_u(cls, x, y, z):
+        return cls.A_W * (-cls.sin60 * y + cls.cos60 * z) + cls.C_U
+
+    @classmethod
+    def pos_to_v(cls, x, y, z):
+        return cls.A_W * (cls.sin60 * y + cls.cos60 * z) + cls.C_V
+
+    @classmethod
+    def pos_to_y(cls, x, y, z):
+        return cls.A_W * z + cls.C_Y
+
+    @classmethod
+    def pos_to_time(cls, x, y, z):
+        return cls.A_T * x + cls.C_T
+
+    @classmethod
+    def wire_time_to_window(cls, wire, nu_wire, window_width):
+        window_origin = nu_wire - (window_width // 2)
+        return wire - window_origin
+
+
 def _save_plot(config: Config, fig: Figure, title: str):
     if isinstance(config.plot_format, list):
         for format in config.plot_format:
