@@ -13,6 +13,8 @@ from matplotlib.figure import Figure
 
 from sigmazerosearch.general import Config
 
+logger = logging.getLogger(__name__)
+
 
 class WireGeometry:
     """
@@ -60,7 +62,7 @@ def _save_plot(config: Config, fig: Figure, title: str):
                 dpi=300,
                 bbox_inches="tight",
             )
-            logging.info(
+            logger.info(
                 "saved plot to %s", pathlib.Path(config.plot_dir / f"{title}.{format}")
             )
     else:
@@ -69,7 +71,7 @@ def _save_plot(config: Config, fig: Figure, title: str):
             dpi=300,
             bbox_inches="tight",
         )
-        logging.info(
+        logger.info(
             "saved plot to %s",
             pathlib.Path(config.plot_dir / f"{title}.{config.plot_format}"),
         )
@@ -173,7 +175,7 @@ def print_rse(arr: ak.Array, file=sys.stdout):
     """
     for elem in arr:
         print(f"{elem.run} {elem.subrun} {elem.event}", file=file)  # type: ignore
-    logging.info(f"output rse numbers for {len(arr)} events to {file.name}")
+    logger.info(f"output rse numbers for {len(arr)} events to {file.name}")
 
 
 def file_ok(filename: str, mode: str = "read") -> bool:
@@ -185,6 +187,7 @@ def file_ok(filename: str, mode: str = "read") -> bool:
     try:
         fp = open(filename) if mode == "read" else open(filename, "w")
     except FileNotFoundError:
+        logger.warning(f"file {filename} not found")
         return False
     else:
         fp.close()

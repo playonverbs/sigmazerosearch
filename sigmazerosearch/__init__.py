@@ -25,3 +25,25 @@ An occasionally-updated spec for the input files is available
 This project is under very active development. Expect breaking API changes.
 :::
 """
+
+import logging
+
+
+def _setup_logging():
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+    ch = logging.StreamHandler()
+    ch.setFormatter(
+        logging.Formatter(
+            "{asctime} - {levelname} - {message}",
+            # "{asctime} - {name} - {levelname} - {message}",
+            style="{",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    )
+    ch.setLevel(logging.INFO)
+    logger.addHandler(ch)
+
+
+_setup_logging()

@@ -2,6 +2,7 @@
 Selection contains the main objects for handling the physics selection.
 """
 
+import logging
 from dataclasses import asdict, dataclass
 from enum import IntEnum
 from os.path import isabs
@@ -25,6 +26,8 @@ ValueUnc = list[float]
 ValueUnc represents a central value with either a symmetric or (upper,
 lower) associated error.
 """
+
+logger = logging.getLogger(__name__)
 
 
 class EventCategory(IntEnum):
@@ -278,8 +281,10 @@ class Selection:
         accum = ak.Array([]) if accumulate else None
         for s in self.samples:
             scale = self.samples.target_POT / s.POT
+            logger.info(f"Opening {s.file_name.split('/')[-1]}:")
             if isinstance(s.df, HasBranches):
                 for i, cut in enumerate(cuts):
+                    logger.debug(f"Applying cut {cut.name} to {s.name}")
                     for arr in _yield_array_from_ttree(s.df, self.config):
                         if s.type == SampleType.Hyperon:
                             cut.total_signal += scale * ak.sum(
