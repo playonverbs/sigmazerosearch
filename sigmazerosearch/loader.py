@@ -16,7 +16,9 @@ from sigmazerosearch.general import Config
 
 def _yield_array_from_ttree(tree: HasBranches, config: Config):
     # if config.iterate:
-    for arr in tree.iterate(step_size=config.iterate_step, report=None):  # type: ignore
+    for arr in tree.iterate(
+        expressions=config.branch_list, step_size=config.iterate_step, report=None
+    ):  # type: ignore
         yield arr
     # else:
     #     return tree.arrays(config.branch_list)
