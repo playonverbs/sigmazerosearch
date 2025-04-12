@@ -127,6 +127,11 @@ class Cut:
 
         return True
 
+    @classmethod
+    def null(cls):
+        """Returns the 'null' or identity Cut that passes all events"""
+        return Cut("null", lambda arr: len(arr) * [True])
+
     def __repr__(self) -> str:
         return f"<Cut name={self.name} passing={self.n_passing} signal={self.n_signal} background={self.n_background}>"
 
