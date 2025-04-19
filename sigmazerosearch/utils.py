@@ -5,8 +5,10 @@ Mixed utility functions.
 import logging
 import pathlib
 import sys
+from typing import Literal
 
 import awkward as ak
+import hist
 import numpy as np
 import vector
 from matplotlib.figure import Figure
@@ -77,7 +79,14 @@ def _save_plot(config: Config, fig: Figure, title: str):
         )
 
 
-def npfp(arr, opt: str | None = None) -> ak.Array:
+def hist_bin_label(
+    ax, hist: hist.Hist | hist.BaseHist, label: str, unit: str | None = None
+):
+    """Set an axes y-label to a string based on a histograms bin widths and label"""
+    ax.set_ylabel(f"{label} / {hist.axes[0].widths[0]:.2g} {unit if unit else ''}")
+
+
+def npfp(arr, opt: Literal["track", "shower", "both"] | None = None) -> ak.Array:
     """
     Returns the number of pfps in the given array that are either track-like,
     shower-like, or both.

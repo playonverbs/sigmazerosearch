@@ -133,7 +133,7 @@ void bdt_apply(std::string in_file, std::string weights_file) {
 		}
 
 		bdt_branch->Fill();
-		if (i_evt % 50 == 0)
+		if (i_evt % 100 == 0)
 			std::printf("%lld / %lld (%.1f %%) events processed\n",
 					i_evt, n_entries, 100.0 * (static_cast<float>(i_evt) / static_cast<float>(n_entries)));
 	}
