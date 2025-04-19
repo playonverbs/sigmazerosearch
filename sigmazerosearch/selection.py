@@ -191,7 +191,7 @@ class SampleType(IntEnum):
     """All enriched hyperon interactions."""
     Dirt = 3
     """Out of TPC interactions."""
-    Ext = 4
+    EXT = 4
     """Interactions originating from cosmic origins."""
 
 
@@ -304,10 +304,18 @@ class Selection:
                         if accumulate and (i == len(cuts) - 1):
                             filter_arr["sample"] = s.type.name
                             filter_arr["cut"] = cut.name
+
+                            # POT weight: null weight if signal found in non-hyperon file
+                            filter_arr["weight"] = (
+                                ak.where(signal_def(filter_arr), 0.0, scale)
+                                if s.type != SampleType.Hyperon
+                                else scale
+                            )
                             accum = ak.concatenate((accum, filter_arr), axis=0)
             else:
                 raise TypeError(f"sample {s.file_name} has not been loaded")
 
+        logger.info(f"Applied cuts: {', '.join([cut.name for cut in self.cuts])}")
         if accumulate:
             return accum
 
