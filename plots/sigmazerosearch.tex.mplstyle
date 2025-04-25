@@ -1,4 +1,9 @@
-text.usetex : true
-font.family : "serif"
-font.size : 14
-axes.titlelocation : "right"
+text.usetex: true
+font.family: "serif"
+font.size: 16
+
+axes.titlelocation: "right"
+axes.xmargin: 0
+
+legend.frameon: false
+legend.handletextpad: 0.3
