@@ -6,6 +6,9 @@ Lambda analysis. These are prepended with `cthorpe_` to label as them being
 from that analysis.
 """
 
+from pathlib import Path
+
+from sigmazerosearch.general import Config
 from sigmazerosearch.selection import ParameterSet
 
 cthorpe_FHC_Tune_325 = ParameterSet(
@@ -35,3 +38,32 @@ cthorpe_RHC_Tune_397 = ParameterSet(
 """
 Corresponds to [Frozen RHC Tune 397](https://github.com/cthorpe123/HyperonAnalysis/blob/master/ParameterSets/Parameters.h#L53)
 """
+
+config = Config(
+    plot_save=True,
+    plot_dir=Path("plots/"),
+    plot_format=["png", "svg"],
+    perf_percent=True,
+    iterate=True,
+    iterate_step="40 MB",
+    branch_list=[
+        "flash_match_nu_slice_ID",
+        "reco_primary_vtx_inFV",
+        "reco_primary_vtx_x",
+        "reco_primary_vtx_y",
+        "reco_primary_vtx_z",
+        "pfp_trk_shr_score",
+        "mc_nu_pdg",
+        "mc_hyperon_pdg",
+        "mc_nu_pos_x",
+        "mc_nu_pos_y",
+        "mc_nu_pos_z",
+        "mc_decay_pdg",
+        "trk_llrpid",
+        "trk_length",
+        "trk_start_x",
+        "trk_start_y",
+        "trk_start_z",
+        "pfp_photon_bdt_score",
+    ],
+)
