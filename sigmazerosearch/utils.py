@@ -11,6 +11,7 @@ import awkward as ak
 import hist
 import numpy as np
 import vector
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from sigmazerosearch.general import Config
@@ -80,7 +81,7 @@ def _save_plot(config: Config, fig: Figure, title: str):
 
 
 def hist_bin_label(
-    ax, hist: hist.Hist | hist.BaseHist, label: str, unit: str | None = None
+    ax: Axes, hist: hist.Hist | hist.BaseHist, label: str, unit: str | None = None
 ):
     """Set an axes y-label to a string based on a histograms bin widths and label"""
     ax.set_ylabel(f"{label} / {hist.axes[0].widths[0]:.2g} {unit if unit else ''}")
