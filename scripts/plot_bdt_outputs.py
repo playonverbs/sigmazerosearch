@@ -12,6 +12,7 @@ from typing import Literal
 
 import hist
 import matplotlib.pyplot as plt
+import numpy as np
 import uproot as up
 
 
@@ -154,7 +155,7 @@ def main(args):
 
         for sig, bkg in inputs:
             alpha = 0.2
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(layout="constrained")
 
             bkg.plot(histtype="band", ax=ax, fc="tab:orange", alpha=alpha, hatch=None)
             bkg.plot(ax=ax, label="Background", color="tab:orange", yerr=False)
@@ -181,7 +182,7 @@ def main(args):
 
         sig, sig_train, bkg, bkg_train = responses
         alpha = 0.2
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(layout="constrained")
 
         # bkg.plot(histtype="band", ax=ax, fc="tab:orange", alpha=alpha, hatch=None)
         bkg.plot(ax=ax, label="Background (Test)", color="tab:orange", yerr=False)
@@ -241,7 +242,7 @@ def main(args):
         fig, ax = plt.subplots()
         sig_corr.plot2d(ax=ax, labels=True)
         ax.set_title("Photon BDT", loc="left")
-        ax.set_title("Correlation Matrix (Signal)")
+        ax.set_title("Correlation (Signal)")
         ax.set_xlabel("")
         ax.set_ylabel("")
         ax.set_xticklabels(
@@ -258,7 +259,7 @@ def main(args):
         fig, ax = plt.subplots()
         bkg_corr.plot2d(ax=ax, labels=True)
         ax.set_title("Photon BDT", loc="left")
-        ax.set_title("Correlation Matrix (Background)")
+        ax.set_title("Correlation (Background)")
         ax.set_xlabel("")
         ax.set_ylabel("")
         ax.set_xticklabels(
@@ -280,20 +281,31 @@ def main(args):
         plot_roc(fd, args=args)
 
     if args.perf:
+        n_signal, n_bkg = (265, 171389)  # XXX: Hardcoded values
         for sig, bkg in mva_performance_hists(fd):
-            fig, ax = plt.subplots()
-            sig.plot(ax=ax, label="Signal", yerr=False)
-            bkg.plot(ax=ax, label="Background", yerr=False)
+            fig, ax = plt.subplots(layout="constrained")
+            sig.plot(ax=ax, label="Signal", yerr=False, w2method="sqrt")
+            bkg.plot(
+                ax=ax, label="Background", yerr=False, w2method="sqrt"
+            )  # yerr=False)
             method = sig.name.split("_")[1]
 
             ax.set_title("NuMI Run 3b")
             ax.set_title("Photon BDT Efficiencies", loc="left")
             ax.set_xlabel("Response Score Cut")
             ax.axhline(1.0, color="lightgrey", linestyle="dashed")
+            h1, l1 = ax.get_legend_handles_labels()
             ax2 = ax.twinx()
-            sign = calc_significance(sig, bkg)
-            sign.plot(ax=ax2, label="Significance (S=1000,B=1000)", yerr=False)
-            ax.legend(title=method)
+            sign, optimum = calc_significance(sig, bkg, n_signal=n_signal, n_bkg=n_bkg)
+            sign.plot(
+                ax=ax2,
+                label=f"Significance (S={n_signal}, B={n_bkg})",
+                yerr=False,
+                ec="tab:red",
+            )
+            ax.axvline(optimum, color="lightgrey", linestyle="dashed")
+            h2, l2 = ax2.get_legend_handles_labels()
+            ax.legend(h1 + h2, l1 + l2, title=method)
 
             if args.save:
                 fig.savefig(f"MVA_{method}_performance.{args.ext}", bbox_inches="tight")
@@ -310,7 +322,7 @@ def plot_roc(
     ] = "BDT",
     diag=True,
 ):
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(layout="constrained")
     h = ntuple.get(f"dataset/Method_{method}/{method}/MVA_{method}_rejBvsS").to_hist()
 
     if h is None:
@@ -334,29 +346,21 @@ def plot_roc(
 def calc_significance(
     signal_eff: hist.BaseHist, bkg_eff: hist.BaseHist, n_signal=1000, n_bkg=1000
 ) -> hist.BaseHist:
-    # H_sig, edges_sig = signal_eff.to_numpy()
-    # H_bkg, _ = bkg_eff.to_numpy()
+    H_sig, _ = signal_eff.to_numpy()
+    H_bkg, _ = bkg_eff.to_numpy()
 
-    # H_significance = (n_signal * H_sig) / (
-    #     (n_signal * H_sig) + (n_bkg * H_bkg)
-    # )
+    p = (H_sig * n_signal) / np.sqrt((H_bkg * n_bkg) + (H_sig * n_signal))
 
-    # S = signal_eff.values()
-    # B = bkg_eff.values()
+    H_significance = hist.Hist.new.Regular(
+        signal_eff.axes[0].size,
+        signal_eff.axes[0].edges[0],
+        signal_eff.axes[0].edges[-1],
+    ).Double()
+    H_significance[...] = p
 
-    # significance = (n_signal * S) / ((n_signal * S) + (n_bkg * B))
+    optimum = H_significance.to_numpy()[1][np.argmax(H_significance.to_numpy()[0])]
 
-    h = signal_eff.copy()
-    print(h.density())
-    # h.reset()
-    # h = hist.Hist.new.Regular(
-    #     signal_eff.axes[0].size,
-    #     signal_eff.axes[0].edges[0],
-    #     signal_eff.axes[0].edges[-1],
-    # ).Double()
-    # h[...] = significance
-
-    return h
+    return H_significance, optimum
 
 
 if __name__ == "__main__":
