@@ -65,5 +65,6 @@ config = Config(
         "trk_start_y",
         "trk_start_z",
         "pfp_photon_bdt_score",
+        "ct_test_window_plane0",
     ],
 )

@@ -24,6 +24,8 @@ value are used and applied upstream in the
 > Unresponsive wire regions have yet to be handled by this code.
 """
 
+from typing import Literal
+
 import awkward as ak
 import hist
 import numpy as np
@@ -40,12 +42,56 @@ LABEL_STRUCTURE = [
 """Structure passed to <inv:#scipy.ndimage.label> to decide adjacent hits"""
 
 
+def compute_island_sizes(
+    islands, metric: Literal["hits", "size"] = "hits"
+) -> list[float] | list[int]:
+    """
+    Given the output of the <inv:#scipy.ndimage.label>, an option of which
+    metric for size to use and a <project:#ParameterSet>.
+
+    This either computes the length of the longest axes of each island or the
+    number of hits encompassed by an island.
+
+    Note that when passing 'size', there is an axis mismatch, one axis
+    corresponds to drift time ticks while the other corresponds to anode plane
+    wires. These are not equal and should be transformed into detector
+    coordinates.
+    """
+    lbl, _ = islands
+
+    if metric == "hits":
+        return [lbl[obj].size for obj in ndi.find_objects(lbl)]
+    elif metric == "size":
+        # Computes the euclidean distance. Not quite correct so far.
+        return [
+            np.sqrt(np.add.reduce(np.square(lbl[obj].shape)))
+            for obj in ndi.find_objects(lbl)
+        ]
+
+
+def filter_window_sizes(islands, pset: ParameterSet):
+    """
+    Given the output of <project:#_window_to_map> or
+    <inv:#scipy.ndimage.label>, filter the resulting islands and return a new
+    NDArray representing the filtered array and the number of surviving
+    islands.
+    """
+    assert pset.ct_island_size is not None
+
+    lbls, _ = islands
+
+    lengths = ak.Array(compute_island_sizes(islands))
+    indices = ak.local_index(lengths)[lengths >= pset.ct_island_size] + 1
+
+    return np.where(np.isin(lbls, ak.to_numpy(indices)), lbls, 0), len(indices)
+
+
 def convert_seeds_to_window(seeds: dict):
     """
     Takes a map of names to x,y,z positions and converts them to wire,time
     coordinates
     """
-    for key, value in seeds.items():
+    for value in seeds.values():
         utils.WireGeometry.pos_to_u(*value)
     raise NotImplementedError
 
@@ -80,6 +126,7 @@ def count_event_islands(
     Takes a sample <inv:#ak.Array> and returns the number of islands found in
     each plane in each event
     """
+    filter_sizes = pset.ct_island_size is not None
 
     islands = {
         "ct_test_islands_plane0": [],
@@ -91,15 +138,21 @@ def count_event_islands(
 
     for window in arr.ct_test_window_plane0:
         labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+        if filter_sizes:
+            labelled = filter_window_sizes(labelled, pset)
         islands["ct_test_islands_plane0"].append(labelled[1])
 
-    for window in arr.ct_test_window_plane1:
-        labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
-        islands["ct_test_islands_plane1"].append(labelled[1])
+    # for window in arr.ct_test_window_plane1:
+    #     labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+    #     if filter_sizes:
+    #         labelled = filter_window_sizes(labelled, pset)
+    #     islands["ct_test_islands_plane1"].append(labelled[1])
 
-    for window in arr.ct_test_window_plane2:
-        labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
-        islands["ct_test_islands_plane2"].append(labelled[1])
+    # for window in arr.ct_test_window_plane2:
+    #     labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+    #     if filter_sizes:
+    #         labelled = filter_window_sizes(labelled, pset)
+    #     islands["ct_test_islands_plane2"].append(labelled[1])
 
     return ak.from_iter(islands)
 
