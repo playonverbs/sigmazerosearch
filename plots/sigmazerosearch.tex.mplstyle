@@ -5,5 +5,8 @@ font.size: 16
 axes.titlelocation: "right"
 axes.xmargin: 0
 
+grid.alpha: 0.8
+grid.color: lightgrey
+
 legend.frameon: false
 legend.handletextpad: 0.3

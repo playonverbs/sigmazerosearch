@@ -359,7 +359,7 @@ class Selection:
         effs: list[float] = [c.eff() for c in self.cuts]
         purs: list[float] = [c.pur() for c in self.cuts]
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(6, 7), layout="constrained")
         ax.set_title("Selection Performance", loc="right", weight="bold")
         if exp:
             ax.set_ylabel(r"$\epsilon p$")
@@ -381,17 +381,20 @@ class Selection:
             (p,) = ax2.plot(names, purs, label="purity", color="tab:orange", marker="^")
             ax.set_ylabel(
                 "Efficiency{percent}".format(
-                    percent=" [%]" if self.config.perf_percent else ""
+                    percent=" [\%]" if self.config.perf_percent else ""
                 )
             )
             ax2.set_ylabel(
                 "Purity{percent}".format(
-                    percent=" [%]" if self.config.perf_percent else ""
+                    percent=" [\%]" if self.config.perf_percent else ""
                 )
             )
             ax.legend([e, p], ["Efficiency", "Purity"], loc="upper center")
 
-        fig.tight_layout()
+        ax.grid(True, "major", "y")
+        ax.set_ylim(0, 100)
+        ax.tick_params("x", rotation=90)
+
         if self.config.plot_save:
             utils._save_plot(self.config, fig, f"selection_performance{self.label}")
         plt.show()
