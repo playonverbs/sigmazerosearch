@@ -22,7 +22,9 @@ logger = logging.getLogger(__name__)
 class WireGeometry:
     """
     A suite of methods to convert from MicroBooNE detector coordinates to
-    wire,time coordinates for each anode plane.
+    wire,time coordinates for each anode plane. These have been converted from
+    the C++ code in <github:cthorpe123/HyperonProduction>. Which is in turn based
+    on <docdb:25505>.
     """
 
     A_W = 3.33328
