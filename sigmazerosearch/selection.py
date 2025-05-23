@@ -16,8 +16,8 @@ from uproot.behaviors.TBranch import HasBranches
 
 import sigmazerosearch.alg.fv as fv
 import sigmazerosearch.utils as utils
+from sigmazerosearch import loader
 from sigmazerosearch.general import PDG, Config
-from sigmazerosearch.loader import _yield_array_from_ttree, get_POT, load_ntuple
 from sigmazerosearch.truth import GenType
 
 # ValueUnc = tuple[float, float] | tuple[float, float, float]
@@ -158,6 +158,9 @@ class ParameterSet:
     """Units: GeV"""
     w_lambda_max: float
     """Units: GeV"""
+    ct_time_bins: int = 250  # FIXME: remove from defaults
+    ct_wire_window: int = 100  # FIXME: remove from defaults
+    ct_island_size: int | None = 6  # FIXME: remove from defaults
 
     @staticmethod
     def from_dict(kwargs):
@@ -211,7 +214,7 @@ class Sample:
         self.file_name: str = file_name
         self.type: SampleType = type
         self.gen_type: GenType = gen_type
-        self.POT: float = POT if POT else get_POT(file_name)  # type: ignore
+        self.POT: float = POT if POT else loader.get_POT(file_name)  # type: ignore
         self.is_data: bool = is_data
         self.df: HasBranches | None = None
 
@@ -223,7 +226,7 @@ class Sample:
         """Read file_name into an awkward.Array"""
         if not isabs(self.file_name):
             raise OSError
-        self.df = load_ntuple(self.file_name + ":ana/OutputTree")
+        self.df = loader.load_ntuple(self.file_name + ":ana/OutputTree")
 
     def _validate_(self) -> bool:
         if self.POT < 0:
@@ -290,7 +293,7 @@ class Selection:
             if isinstance(s.df, HasBranches):
                 for i, cut in enumerate(cuts):
                     logger.debug(f"Applying cut {cut.name} to {s.name}")
-                    for arr in _yield_array_from_ttree(s.df, self.config):
+                    for arr in loader._yield_array_from_ttree(s.df, self.config):
                         if s.type == SampleType.Hyperon:
                             cut.total_signal += scale * ak.sum(
                                 signal_def(arr), axis=None

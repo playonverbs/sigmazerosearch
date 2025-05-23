@@ -62,7 +62,8 @@ def compute_island_sizes(
     if metric == "hits":
         return [lbl[obj].size for obj in ndi.find_objects(lbl)]
     elif metric == "size":
-        # Computes the euclidean distance. Not quite correct so far.
+        # Computes the euclidean distance
+        # FIXME: Not quite correct, assumes equal time-wire unit lengths.
         return [
             np.sqrt(np.add.reduce(np.square(lbl[obj].shape)))
             for obj in ndi.find_objects(lbl)
@@ -119,9 +120,7 @@ def _window_to_map(window: ak.Array, time_bins: int, wires_max: int):
     return ndi.label(clipped, structure=LABEL_STRUCTURE)
 
 
-def count_event_islands(
-    arr: ak.Array, pset: ParameterSet, view: utils.WireView | None = None
-) -> ak.Array:
+def count_event_islands(arr: ak.Array, pset: ParameterSet) -> ak.Array:
     """
     Takes a sample <inv:#ak.Array> and returns the number of islands found in
     each plane in each event
@@ -142,17 +141,17 @@ def count_event_islands(
             labelled = filter_window_sizes(labelled, pset)
         islands["ct_test_islands_plane0"].append(labelled[1])
 
-    # for window in arr.ct_test_window_plane1:
-    #     labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
-    #     if filter_sizes:
-    #         labelled = filter_window_sizes(labelled, pset)
-    #     islands["ct_test_islands_plane1"].append(labelled[1])
+    for window in arr.ct_test_window_plane1:
+        labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+        if filter_sizes:
+            labelled = filter_window_sizes(labelled, pset)
+        islands["ct_test_islands_plane1"].append(labelled[1])
 
-    # for window in arr.ct_test_window_plane2:
-    #     labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
-    #     if filter_sizes:
-    #         labelled = filter_window_sizes(labelled, pset)
-    #     islands["ct_test_islands_plane2"].append(labelled[1])
+    for window in arr.ct_test_window_plane2:
+        labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+        if filter_sizes:
+            labelled = filter_window_sizes(labelled, pset)
+        islands["ct_test_islands_plane2"].append(labelled[1])
 
     return ak.from_iter(islands)
 
