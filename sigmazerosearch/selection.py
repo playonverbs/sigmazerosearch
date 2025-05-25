@@ -275,6 +275,9 @@ class Selection:
         self.cuts: list[Cut] = kwargs["cuts"]
         self.label: str = "_" + kwargs["label"] if kwargs.get("label") else ""
         self.config: Config = kwargs.get("config", Config.default())
+        self.dead_wire_map = loader.load_dead_wire_map(
+            self.config.data_dir / "MCC9_channel_list.txt"
+        )
         self.config.validate()
 
     def apply_cut(

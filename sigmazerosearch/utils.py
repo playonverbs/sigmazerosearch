@@ -58,6 +58,11 @@ class WireGeometry:
         window_origin = nu_wire - (window_width // 2)
         return wire - window_origin
 
+    @classmethod
+    def wire_boundaries(cls):
+        """Returns plane wire ID boundaries starting from 1"""
+        return np.array([0, 2400, 2400 + 2400, 2400 + 2400 + 3456])
+
 
 def _save_plot(config: Config, fig: Figure, title: str):
     if isinstance(config.plot_format, list):

@@ -23,6 +23,7 @@ class Config:
     branch_list: Iterable[str] | None = None
     iterate: bool = False
     iterate_step: int | str | None = None
+    data_dir: Path = Path("data/")
 
     def __post_init__(self):
         self.validate()
