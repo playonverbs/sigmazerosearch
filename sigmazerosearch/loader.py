@@ -58,7 +58,9 @@ def get_POT(filename: str) -> float:
     return ak.sum(pots_per_subrun)
 
 
-def load_dead_wire_map(filename: str | Path, transpose: bool = True) -> ArrayLike:
+def load_dead_wire_map(
+    filename: str | Path, transpose: bool = True
+) -> ArrayLike | tuple[ArrayLike]:
     """
     Given a path to a dead-wire channel map, produce an array of all valid
     wires. Optionally produced for each plane.
