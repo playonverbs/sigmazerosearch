@@ -1,6 +1,13 @@
 import pytest
 
-from sigmazerosearch.alg.fv import in_active_tpc
+from sigmazerosearch.alg import fv
+
+
+def _len(xs):
+    try:
+        return len(xs)
+    finally:
+        return 1
 
 
 @pytest.mark.parametrize(
@@ -19,4 +26,20 @@ from sigmazerosearch.alg.fv import in_active_tpc
     ],
 )
 def test_in_active_tpc(x, y, z, want):
-    assert in_active_tpc(x, y, z) == want
+    assert fv.in_active_tpc(x, y, z) == want
+    assert _len(fv.in_active_tpc(x, y, z)) == _len(
+        want
+    ), "input and output dimensions not consistent"
+
+
+@pytest.mark.parametrize(
+    "x, y, z, want",
+    [
+        (1, 2, 3, 1),
+    ],
+)
+def test_r_closest_wall(x, y, z, want):
+    assert fv.r_to_closest_wall(x, y, z) == want, "chose wrong closest distance"
+    assert _len(fv.r_to_closest_wall(x, y, z)) == _len(
+        want
+    ), "input and output dimensions not consistent"
