@@ -22,3 +22,11 @@ Major project dependencies are as follows:
 [Tabulate](<pypi:tabulate>)
 : Pretty looking tables printed on the command-line. Allows for outputting in
   multiple formats including Markdown and LaTeX.
+
+For those wishing to use multi-variate analysis tools:
+
+[ROOT](https://root.cern/)
+: A Framework tailored towards the treatment of particle physics data. Includes
+  a multi-variate analysis toolkit [(TMVA)](https://root.cern/topical/#tmva)
+  which is used for {abbr}`BDT (Boosted Decision Tree)`-dependent cuts in this
+  framework's prime analysis.

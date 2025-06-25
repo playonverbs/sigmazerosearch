@@ -111,6 +111,13 @@ class Cut:
         return self.n_signal[0] / self.n_passing[0]
 
     def update(self, arr, cond, scale: float = 1.0, sample=None):
+        """
+        Update the cut with the numbers of signal, background and selected
+        events.
+
+        These are scaled to the given weighting (eg. POT-based), and signal
+        events are only counted if they are from a Hyperon sample.
+        """
         if sample and sample.type == SampleType.Hyperon:
             self.n_signal[0] += scale * ak.sum(signal_def(arr[cond]))
         self.n_background[0] += scale * ak.sum(~signal_def(arr[cond]), axis=None)
@@ -290,6 +297,13 @@ class Selection:
         Apply a given selection cut's cut function to the sample arrays and
         accumulates the resulting number of signal, background and total
         passing particles per cut.
+
+        When `accumulate = True`, this also adds the following fields to the
+        output array:
+
+        :sample: The string representation of the sample type the entry is from
+        :cut: The name of the latest cut the event has passed.
+        :weight: A per-event weighting (currently based only on the sample POT)
         """
 
         accum = ak.Array([]) if accumulate else None
@@ -462,7 +476,7 @@ class Selection:
         return [sample.type for sample in self.samples]
 
     def _validate_cuts_(self) -> bool:
-        """run validation for all assoc cuts"""
+        """Run validation for all associated cuts"""
         for cut in self.cuts:
             if not cut._validate_():
                 return False
@@ -470,13 +484,13 @@ class Selection:
         return True
 
     def open_files(self) -> None:
-        """load all samples into dataframes synchronously (for now)"""
+        """Load all samples into dataframes synchronously (for now)"""
         for sample in self.samples:
             sample.load_df()
 
     def close_files(self) -> None:
         """
-        delete dataframe objects from memory, to be run after IO operations
+        Delete dataframe objects from memory, to be run after IO operations
         have been run on samples
         """
         for s in self.samples:

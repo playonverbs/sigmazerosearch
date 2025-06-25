@@ -37,12 +37,19 @@ packages is available in <project:#dependencies>.
 
 ```{toctree}
 :maxdepth: 2
-:caption: Contents:
+:caption: Contents
 :hidden:
 
 usage
 dependencies
 api/index
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: HyperonProduction Module
+:hidden:
+
 larsoft
 ntuples
 ```

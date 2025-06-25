@@ -1,3 +1,10 @@
+"""
+Functions and definitions for a Fiducial Volume (FV) within the detector.
+
+An FV aims to remove areas of suboptimal detector response and areas where
+large amounts of 'Dirt' interactions occur.
+"""
+
 import awkward as ak
 import numpy as np
 
