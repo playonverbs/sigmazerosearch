@@ -2,7 +2,7 @@
 General types to aid in configuring the framework.
 """
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import IntEnum
 from pathlib import Path
 from typing import Iterable
@@ -27,6 +27,13 @@ class Config:
 
     def __post_init__(self):
         self.validate()
+
+    @staticmethod
+    def from_dict(kwargs):
+        return Config(**kwargs)
+
+    def with_(self, kvs: dict):
+        return Config.from_dict(asdict(self) | kvs)
 
     @classmethod
     def default(cls):

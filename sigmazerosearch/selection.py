@@ -179,6 +179,9 @@ class ParameterSet:
             file=file,
         )
 
+    def with_(self, kvs: dict):
+        return ParameterSet.from_dict(asdict(self) | kvs)
+
 
 class SampleType(IntEnum):
     """
