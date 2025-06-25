@@ -31,7 +31,6 @@ import hist
 import numpy as np
 import scipy.ndimage as ndi
 
-import sigmazerosearch.utils as utils
 from sigmazerosearch.selection import ParameterSet
 
 LABEL_STRUCTURE = [
@@ -87,16 +86,6 @@ def filter_window_sizes(islands, pset: ParameterSet):
     return np.where(np.isin(lbls, ak.to_numpy(indices)), lbls, 0), len(indices)
 
 
-def convert_seeds_to_window(seeds: dict):
-    """
-    Takes a map of names to x,y,z positions and converts them to wire,time
-    coordinates
-    """
-    for value in seeds.values():
-        utils.WireGeometry.pos_to_u(*value)
-    raise NotImplementedError
-
-
 # TODO: change from using hist.Hist to np.histogram2d
 def _window_to_map(window: ak.Array, time_bins: int, wires_max: int):
     """
@@ -114,13 +103,35 @@ def _window_to_map(window: ak.Array, time_bins: int, wires_max: int):
     h.fill_flattened(time=times, wire=wires)
 
     # XXX: think about this unsafe casting
-    clipped = np.clip(h.values(), 0, 1, dtype=np.int32, casting="unsafe")
-
-    # NOTE: also consider a function to return the intermediate 'event display'
-    return ndi.label(clipped, structure=LABEL_STRUCTURE)
+    return np.clip(np.flip(h.values().T, 0), 0, 1, dtype=np.int32, casting="unsafe")
 
 
-def count_event_islands(arr: ak.Array, pset: ParameterSet) -> ak.Array:
+def _window_to_map_numpy(window: ak.Array, time_bins: int, wires_max: int):
+    """
+    Alternate impl of `_window_to_map` using hist -> numpy integration
+    functions.
+    """
+
+    wires, times = ak.broadcast_arrays(ak.local_index(window, axis=0), window)
+
+    # XXX: How does this handle null values (wires with no hits)?
+    h, _, _ = hist.numpy.histogram2d(
+        ak.flatten(times),
+        ak.flatten(wires),
+        bins=(time_bins, wires_max),
+        range=((0, 7500), (0, wires_max)),
+    )
+
+    return np.clip(np.flip(h.T, 0), 0, 1, dtype=np.int32, casting="unsafe")
+
+
+def _find_map_islands(window: ak.Array):
+    return ndi.label(window, structure=LABEL_STRUCTURE)
+
+
+def count_event_islands(
+    arr: ak.Array, pset: ParameterSet, dead_wire_map=None, nu_wires=None
+) -> ak.Array:
     """
     Takes a sample <inv:#ak.Array> and returns the number of islands found in
     each plane in each event
@@ -135,25 +146,47 @@ def count_event_islands(arr: ak.Array, pset: ParameterSet) -> ak.Array:
 
     # TODO: add option for selecting wire view
 
-    for window in arr.ct_test_window_plane0:
-        labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+    for i, window in enumerate(arr.ct_test_window_plane0):
+        map = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+        if pset.ct_dead_wire_removal:
+            map = remove_dead_window_channels(map, dead_wire_map[0], nu_wires[i, 0])
+        labelled = _find_map_islands(map)
         if filter_sizes:
             labelled = filter_window_sizes(labelled, pset)
         islands["ct_test_islands_plane0"].append(labelled[1])
 
-    for window in arr.ct_test_window_plane1:
-        labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+    for i, window in enumerate(arr.ct_test_window_plane1):
+        map = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+        if pset.ct_dead_wire_removal:
+            map = remove_dead_window_channels(map, dead_wire_map[1], nu_wires[i, 1])
+        labelled = _find_map_islands(map)
         if filter_sizes:
             labelled = filter_window_sizes(labelled, pset)
         islands["ct_test_islands_plane1"].append(labelled[1])
 
-    for window in arr.ct_test_window_plane2:
-        labelled = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+    for i, window in enumerate(arr.ct_test_window_plane2):
+        map = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+        if pset.ct_dead_wire_removal:
+            map = remove_dead_window_channels(map, dead_wire_map[2], nu_wires[i, 2])
+        labelled = _find_map_islands(map)
         if filter_sizes:
             labelled = filter_window_sizes(labelled, pset)
         islands["ct_test_islands_plane2"].append(labelled[1])
 
-    return ak.from_iter(islands)
+    return ak.zip(islands)
+
+
+def remove_dead_window_channels(window, dead_wires, nu_wire):
+    """
+    Given a relative window of activity, a dead-wire map, and the absolute wire
+    coordinate of the neutrino vertex; produce a new window with dead-wires
+    removed. This takes in parameters for a single plane and is destructive to
+    the window.
+    """
+    transposed = ak.local_index(window, axis=0) - (len(window) // 2) + nu_wire
+    mask = np.isin(transposed, dead_wires)
+
+    return window[~mask]
 
 
 def make_event_map(arr: ak.Array, pset: ParameterSet) -> ak.Array:
