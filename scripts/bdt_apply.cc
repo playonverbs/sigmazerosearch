@@ -56,11 +56,6 @@ void bdt_apply(std::string in_file, std::string weights_file) {
 		throw std::runtime_error("ERROR: could not open input file");
 	}
 
-	/* std::unique_ptr<TFile> output(TFile::Open(out_file.c_str(), "UPDATE")); */
-	/* if (!output || output->IsZombie()) { */
-	/* 	throw std::runtime_error("ERROR: could not open output file"); */
-	/* } */
-
 	TTree* t_Output = input->Get<TTree>("ana/OutputTree");
 	if (!t_Output || t_Output->IsZombie()) {
 		throw std::runtime_error("ERROR: could not get ana/OutputTree from input file");
