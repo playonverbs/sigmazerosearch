@@ -404,12 +404,12 @@ class Selection:
             (p,) = ax2.plot(names, purs, label="purity", color="tab:orange", marker="^")
             ax.set_ylabel(
                 "Efficiency{percent}".format(
-                    percent=" [\%]" if self.config.perf_percent else ""
+                    percent=r" [\%]" if self.config.perf_percent else ""
                 )
             )
             ax2.set_ylabel(
                 "Purity{percent}".format(
-                    percent=" [\%]" if self.config.perf_percent else ""
+                    percent=r" [\%]" if self.config.perf_percent else ""
                 )
             )
             ax.legend([e, p], ["Efficiency", "Purity"], loc="upper center")
