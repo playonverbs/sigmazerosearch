@@ -42,11 +42,15 @@ Corresponds to [Frozen RHC Tune 397](https://github.com/cthorpe123/HyperonAnalys
 config = Config(
     plot_save=True,
     plot_dir=Path("plots/"),
+    data_dir=Path("data/"),
     plot_format=["png", "svg"],
     perf_percent=True,
     iterate=True,
     iterate_step="40 MB",
     branch_list=[
+        "run",
+        "subrun",
+        "event",
         "flash_match_nu_slice_ID",
         "reco_primary_vtx_inFV",
         "reco_primary_vtx_x",
@@ -66,5 +70,67 @@ config = Config(
         "trk_start_z",
         "pfp_photon_bdt_score",
         "ct_test_window_plane0",
+        "ct_test_window_plane1",
+        "ct_test_window_plane2",
+        "ct_test_primary_vtx_wires",
     ],
+)
+
+config_no_window = config.with_(
+    {
+        "branch_list": [
+            "run",
+            "subrun",
+            "event",
+            "flash_match_nu_slice_ID",
+            "reco_primary_vtx_inFV",
+            "reco_primary_vtx_x",
+            "reco_primary_vtx_y",
+            "reco_primary_vtx_z",
+            "pfp_trk_shr_score",
+            "mc_nu_pdg",
+            "mc_hyperon_pdg",
+            "mc_nu_pos_x",
+            "mc_nu_pos_y",
+            "mc_nu_pos_z",
+            "mc_decay_pdg",
+            "trk_llrpid",
+            "trk_length",
+            "trk_start_x",
+            "trk_start_y",
+            "trk_start_z",
+            "pfp_photon_bdt_score",
+        ]
+    }
+)
+
+config_no_bdt = config.with_(
+    {
+        "branch_list": [
+            "run",
+            "subrun",
+            "event",
+            "flash_match_nu_slice_ID",
+            "reco_primary_vtx_inFV",
+            "reco_primary_vtx_x",
+            "reco_primary_vtx_y",
+            "reco_primary_vtx_z",
+            "pfp_trk_shr_score",
+            "mc_nu_pdg",
+            "mc_hyperon_pdg",
+            "mc_nu_pos_x",
+            "mc_nu_pos_y",
+            "mc_nu_pos_z",
+            "mc_decay_pdg",
+            "trk_llrpid",
+            "trk_length",
+            "trk_start_x",
+            "trk_start_y",
+            "trk_start_z",
+            "ct_test_window_plane0",
+            "ct_test_window_plane1",
+            "ct_test_window_plane2",
+            "ct_test_primary_vtx_wires",
+        ]
+    }
 )
