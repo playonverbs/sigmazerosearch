@@ -20,22 +20,34 @@ FV_y: Sides = (-115.53, 117.47)
 FV_z: Sides = (0.1, 1036.9)
 
 
-def in_active_tpc(x, y, z):
+def in_active_tpc(x, y, z, padding: float | None = None):
     """
     Given a set of scalar or vector values corresponding to x, y, z
     coordinates, returns if the point(s) are inside of the fiducial volume as
     currently defined by this file.
     """
-    return np.logical_and.reduce(
-        (
-            x >= FV_x[0],
-            x <= FV_x[1],
-            y >= FV_y[0],
-            y <= FV_y[1],
-            z >= FV_z[0],
-            z <= FV_z[1],
+    if padding is None:
+        return np.logical_and.reduce(
+            (
+                x >= FV_x[0],
+                x <= FV_x[1],
+                y >= FV_y[0],
+                y <= FV_y[1],
+                z >= FV_z[0],
+                z <= FV_z[1],
+            )
         )
-    )
+    else:
+        return np.logical_and.reduce(
+            (
+                x >= (FV_x[0] + padding),
+                x <= (FV_x[1] - padding),
+                y >= (FV_y[0] + padding),
+                y <= (FV_y[1] - padding),
+                z >= (FV_z[0] + padding),
+                z <= (FV_z[1] - padding),
+            )
+        )
 
 
 def r_to_closest_wall(x, y, z):
