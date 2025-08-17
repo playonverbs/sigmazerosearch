@@ -3,6 +3,7 @@ Selection contains the main objects for handling the physics selection.
 """
 
 import logging
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
 from enum import Enum, IntEnum
 from os.path import isabs
@@ -145,7 +146,7 @@ class Cut:
         """Calculate the selection purity at the current Cut"""
         return self.n_signal[0] / self.n_passing[0]
 
-    def update(self, arr, cond, scale: float = 1.0, sample=None):
+    def update(self, arr, cond, scale: float = 1.0, sample=None, signal_def=signal_def):
         """
         Update the cut with the numbers of signal, background and selected
         events.
@@ -376,6 +377,55 @@ class Selection:
         logger.info(f"Applied cuts: {', '.join([cut.name for cut in self.cuts])}")
         if accumulate:
             return accum
+
+    def optimise_cut(
+        self,
+        cutfunc: Callable[[ak.Array, dict], ak.Array],
+        values: dict[str, Iterable],  # | Iterable[ParameterSet],
+        consts: dict = {},
+        signal_def: Callable[[ak.Array], ak.Array] = signal_def,
+        # eff_func: Callable[[ak.Array], ak.Array] | None = None,
+        # pur_func: Callable[[ak.Array], ak.Array] | None = None,
+        prev_cuts: list[Cut] | None = None,
+    ):
+        """
+        Repeatedly applies a cut with a varying parameter. Returns the
+        efficiency and purity at each variation.
+        """
+
+        params_set: list[dict] = []
+        for key, vals in values.items():
+            for val in vals:
+                params_set.append({key: val})
+
+        proxy_cuts = [Cut("proxy_cut", cutfunc) for _ in range(len(params_set))]
+
+        for i, iteration in enumerate(params_set):
+            logger.info(f"Iteration {i+1}")
+            logger.info(iteration | consts)
+            for s in self.samples:
+                scale = self.samples.target_POT / s.POT
+                if isinstance(s.df, HasBranches):
+                    for arr in loader._yield_array_from_ttree(s.df, self.config):
+                        if s.type == SampleType.Hyperon:
+                            proxy_cuts[i].total_signal += scale * ak.sum(
+                                signal_def(arr), axis=None
+                            )
+                        cond = (
+                            np.logical_and.reduce(
+                                [c(arr) for c in prev_cuts]
+                                + [proxy_cuts[i](arr, iteration | consts)]
+                            )
+                            if prev_cuts
+                            else proxy_cuts[i](arr, iteration | consts)
+                        )
+                        proxy_cuts[i].update(
+                            arr, cond, scale=scale, sample=s, signal_def=signal_def
+                        )
+                else:
+                    raise TypeError(f"sample {s.file_name} has not been loaded")
+
+        return np.array([[cut.eff(), cut.pur()] for cut in proxy_cuts])
 
     def plot_reco_effs(self, signal=True) -> None:
         pdgs = [PDG.Photon.value, PDG.Proton.value, PDG.Pi.anti, PDG.Muon.anti]
