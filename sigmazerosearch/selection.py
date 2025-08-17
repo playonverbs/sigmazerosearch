@@ -3,10 +3,10 @@ Selection contains the main objects for handling the physics selection.
 """
 
 import logging
-from dataclasses import asdict, dataclass
-from enum import IntEnum
+from dataclasses import asdict, dataclass, field
+from enum import Enum, IntEnum
 from os.path import isabs
-from typing import Callable, Optional
+from typing import Callable, Literal, Optional
 
 import awkward as ak
 import matplotlib.pyplot as plt
@@ -30,48 +30,83 @@ lower) associated error.
 logger = logging.getLogger(__name__)
 
 
-class EventCategory(IntEnum):
-    Signal = 0
-    Lambda = 1
-    NuMuCC = 2
-    NC = 3
-    Other = 4
+@dataclass(frozen=True)
+class EventCategoryMixin:
+    index: int
+    func: Callable | None = field(repr=False)
+
+
+class EventCategory(EventCategoryMixin, Enum):
+    """
+    Represents categories that MC neutrino interaction events can fit into.
+    Members have an enum index and a function for applying to an array of
+    events.
+
+    If members are used as values (for comparison, etc...) they should be
+    accessed via `.index` or `.name`:
+    ```{code-block} python
+    EventCategory.from_arr(array) == EventCategory.Signal.name
+
+    EventCategory.from_arr(array, "code") == EventCategory.Signal.index
+    ```
+    """
+
+    Other = -1, None
+    Signal = 0, lambda arr: signal_def(arr)
+    Lambda = 1, lambda arr: arr["mc_hyperon_pdg"] == PDG.Lambda.value
+    NuMuCC = (
+        2,
+        lambda arr: np.logical_and.reduce(
+            [np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value, arr["mc_ccnc"] == "CC"]
+        ),
+    )
+    NC = (3, lambda arr: arr["mc_ccnc"] == "NC")
+    NuE = (4, lambda arr: np.abs(arr["mc_nu_pdg"]) == PDG.NuE.value)
+    NuMuDIS = (
+        5,
+        lambda arr: np.logical_and.reduce(
+            [np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value, arr["mc_mode"] == "DIS"]
+        ),
+    )
+    NuMuRES = (
+        6,
+        lambda arr: np.logical_and.reduce(
+            [np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value, arr["mc_mode"] == "RES"]
+        ),
+    )
+
+    def __call__(self, values):
+        if self.func is None:
+            raise TypeError(f"{self}.func is None")
+
+        return self.func(values)
 
     @staticmethod
-    def _signal(arr):
-        return signal_def(arr) * EventCategory.Signal.value
-
-    @staticmethod
-    def _lambda(arr):
-        return (arr["mc_hyperon_pdg"] == PDG.Lambda.value) * EventCategory.Lambda.value
-
-    @staticmethod
-    def _numucc(arr):
-        return (
-            np.logical_and.reduce(
+    def from_arr(arr, output: Literal["string", "code"] = "string"):
+        """
+        Returns the enum value per event given which category each event
+        satisfies.
+        """
+        if output == "string":
+            return np.select(
+                [ec(arr) for ec in list(EventCategory) if ec.func is not None],
                 [
-                    np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
-                    np.abs(arr["mc_lepton_pdg"]) == PDG.Muon.value,
-                ]
+                    [ec.name] * len(arr)
+                    for ec in list(EventCategory)
+                    if ec.func is not None
+                ],
+                default=EventCategory.Other.index,
             )
-            * EventCategory.NuMuCC.value
-        )
-
-    @staticmethod
-    def _nc(arr):
-        return (
-            np.logical_and.reduce(
+        else:
+            return np.select(
+                [ec(arr) for ec in list(EventCategory) if ec.func is not None],
                 [
-                    np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value,
-                    np.abs(arr["mc_lepton_pdg"]) == PDG.NuMu.value,
-                ]
+                    [ec.index] * len(arr)
+                    for ec in list(EventCategory)
+                    if ec.func is not None
+                ],
+                default=EventCategory.Other.index,
             )
-            * EventCategory.NC.value
-        )
-
-    @classmethod
-    def from_arr(cls, arr):
-        return cls._signal(arr) | cls._lambda(arr) | cls._numucc(arr) | cls._nc(arr)
 
 
 def signal_def(arr: ak.Array) -> ak.Array:
