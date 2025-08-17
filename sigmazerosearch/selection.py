@@ -315,7 +315,32 @@ class SampleSet(list[Sample]):
 
 
 class Selection:
+    """
+    Represents a hyperon selection: the selection cuts and event samples the
+    cuts are applied to. This class also keeps config settings and selection
+    cut parameters.
+    """
+
     def __init__(self, **kwargs):
+        """
+        Creates a selection object through passed kwargs. The keyword arguments
+        are given here.
+
+        :param ParameterSet params:
+            Parameters that the selection cuts depend upon. Must be defined
+            before the Selection is bound.
+        :param SampleSet samples:
+            The Samples that make up the selection and also the target POT to
+            scale events to.
+        :param list[Cut] cuts:
+            A list of Cuts that will be applied consecutively to the samples.
+        :param str label:
+            A basic tag for this selection.
+        :param Config config:
+            Configuration options that change how the selection operates:
+            sample iteration step size, plotting directory, etc...
+        """
+
         self.parameters: ParameterSet = kwargs["params"]
         self.samples: SampleSet = kwargs["samples"]
         self.cuts: list[Cut] = kwargs["cuts"]
