@@ -171,3 +171,5 @@ plots/*
 
 # ignore ROOT TMVA output directory
 scripts/dataset
+*.o
+*.root

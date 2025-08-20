@@ -87,6 +87,10 @@ def _save_plot(config: Config, fig: Figure, title: str):
         )
 
 
+def hist_filter_stack(stack: hist.Stack) -> hist.Stack:
+    return hist.Stack.from_iter(filter(lambda s: not s.empty(), stack))
+
+
 def hist_bin_label(
     ax: Axes, hist: hist.Hist | hist.BaseHist, label: str, unit: str | None = None
 ):
