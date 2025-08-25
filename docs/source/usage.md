@@ -134,3 +134,63 @@ def select_foos(arr: ak.Array, my_pset: MyParameterSet):
 
     return arr > my_pset.a_new_param
 ```
+
+## Using Multi-Variate tools
+
+The framework offloads the work required for {abbr}`BDT (Boosted Decision
+Tree)`-like data processing to the [TMVA
+package](https://root.cern/topical/#tmva) of the ROOT framework.
+
+When you have decided what your MVA variables are and at what stage in your
+selection they will be extracted from you can write your variables in the form
+needed for MVA input files.
+
+```python
+import awkward as ak
+import uproot as up
+
+sel = Selection(...)
+
+# Set containing which branches/fields you want written to the BDT trees
+BDT_BRANCHES = {
+    "shr_length",
+    "shr_open_angle",
+    "pfp_true_pdg",
+    "pfp_true_origin"
+}
+
+ # Run the selection
+arr = sel.apply_cut(sel.cuts, accumulate=True)
+
+# Define a ROOT output file (replace if one exists)
+bdt_dir = up.recreate(OUTPUT_PATH)
+
+d = dict(
+    zip(
+        ak.fields(arr[BDT_BRANCHES]),
+        ak.unzip(
+            array[BDT_BRANCHES][
+                ak.num(
+                    array[BDT_BRANCHES].pfp_true_pdg
+                )
+                > 0
+            ]
+        ),
+    )
+)
+
+for k, v in d.items():
+    d[k] = ak.flatten(v)
+
+output = ak.zip(d)
+
+# Write the Signal tree based on a condition
+bdt_dir["bdt/SignalTree"] = output[
+    output.pfp_true_origin == OriginType.SigmaZero.value
+]
+
+# Write the Background tree based on the negated condition
+bdt_dir["bdt/BackgroundTree"] = output[
+    output.pfp_true_origin != OriginType.SigmaZero.value
+]
+```

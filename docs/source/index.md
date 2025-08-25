@@ -23,6 +23,11 @@ This project aims to:
   towards near and future experiments using the
   {abbr}`LArSoft (Liquid Argon Software)` framework.
 
+
+The framework operates in tandem with <github:playonverbs/HyperonProduction>.
+The combination of these codebases can operate on MicroBooNE MCC9/9.1-era
+files.
+
 ```{card}
 :link: https://github.com/cthorpe123/HyperonAnalysis
 
@@ -32,7 +37,7 @@ The author is grateful for and takes inspiration from
 
 ---
 
-This project currently supports Python 3.10, more information on the supporting
+This project currently supports Python 3.12, more information on the supporting
 packages is available in <project:#dependencies>.
 
 ```{toctree}

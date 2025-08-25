@@ -7,6 +7,10 @@ This page is a standalone reference for <github:playonverbs/HyperonProduction>,\
 a module for the LArSoft framework written in C++.
 :::
 
+The additional symbols referenced here that are not a part of the C++ standard
+library or the ROOT framework are described in the [LArSoft
+documentation](https://code-doc.larsoft.org/docs/latest/html/).
+
 ::::::{card} `HyperonProduction_module.cc`
 
 ::::{cpp:struct} hyperon::Config
@@ -127,6 +131,16 @@ module label `label`.
 :::
 
 :::{cpp:function} template <typename T, typename U> std::vector<art::Ptr<T>> hyperon::util::GetAssocProductVector(const art::Ptr<U> &pProd, const art::Event &e, const std::string &label, const std::string &assocLabel)
+
+:tparam T:
+    A type that can be stored within an artroot event file, the final type of
+    the object retrieved.
+:tparam U:
+    A type that can be stored within an artroot event file, the type that `T`
+    is associated with.
+
+Returns all data products of type `T` associated with the data product
+specified by type `U`.
 :::
 
 :::{cpp:function} template <typename T, typename U> art::Ptr<T> hyperon::util::GetAssocProduct(const art::Ptr<U> &pProd, const art::Event &e, const std::string &label, const std::string &assocLabel)
