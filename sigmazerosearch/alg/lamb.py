@@ -9,8 +9,11 @@ negative pion: {math}`\\Lambda \\rightarrow p + \\pi^-`.
 """
 
 import awkward as ak
+import numpy as np
+import particle as part
 
-import sigmazerosearch.utils as utils
+from sigmazerosearch import alg, utils
+from sigmazerosearch.general import PDG
 from sigmazerosearch.selection import ParameterSet
 
 
@@ -81,3 +84,25 @@ def invariant_mass_cut(arr: ak.Array, pset: ParameterSet) -> ak.Array:
     <project:#ParameterSet.w_lambda_max> in GeV, respectively.
     """
     raise NotImplementedError
+
+
+def find_true_p_pi(arr: ak.Array) -> ak.Array:
+    """
+    Find true proton and pion pairs per event, return their 4D momentum
+    vectors.
+    """
+    channel = (ak.sum(arr.mc_decay_pdg == PDG.Proton.value, axis=1) == 1) & (
+        ak.sum(arr.mc_decay_pdg == PDG.Pi.anti, axis=1) == 1
+    )
+
+    # Vectorises the lookup function between PDG code -> particle from
+    # the particle library.
+    pdg_to_mass = np.vectorize(lambda x: part.Particle.from_pdgid(x).mass)
+
+    return alg.p_to_p4D(
+        arr[channel],
+        "mc_decay",
+        mass=pdg_to_mass(arr[channel].mc_decay_pdg),
+    )
+
+    # return arr[channel]
