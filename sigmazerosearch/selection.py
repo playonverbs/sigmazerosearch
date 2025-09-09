@@ -126,6 +126,18 @@ def signal_def(arr: ak.Array) -> ak.Array:
     )  # type: ignore
 
 
+def has_hyperon(arr: ak.Array) -> ak.Array:
+    """Checks if an event has a S=1 baryon (hyperon) present"""
+    return np.logical_or.reduce(
+        (
+            arr["mc_hyperon_pdg"] == PDG.Lambda.value,
+            arr["mc_hyperon_pdg"] == PDG.Sigma0.value,
+            arr["mc_hyperon_pdg"] == PDG.SigmaM.value,
+            arr["mc_hyperon_pdg"] == PDG.SigmaP.value,
+        )
+    )  # type: ignore
+
+
 class Cut:
     """Cut represents a single selection cut and the selection state for it."""
 
@@ -153,9 +165,17 @@ class Cut:
 
         These are scaled to the given weighting (eg. POT-based), and signal
         events are only counted if they are from a Hyperon sample.
+        Events from dirt samples are scaled to 65% of their original value as
+        per NuMI dirt handling procedures.
         """
-        if sample and sample.type == SampleType.Hyperon:
-            self.n_signal[0] += scale * ak.sum(signal_def(arr[cond]))
+
+        if sample:
+            match sample.type:
+                case SampleType.Hyperon:
+                    self.n_signal[0] += scale * ak.sum(signal_def(arr[cond]))
+                case SampleType.Dirt:
+                    scale *= 0.65
+
         self.n_background[0] += scale * ak.sum(~signal_def(arr[cond]), axis=None)
         self.n_passing[0] += scale * ak.sum(cond, axis=None)
 
@@ -204,6 +224,7 @@ class ParameterSet:
     ct_time_bins: int = 250  # FIXME: remove from defaults
     ct_wire_window: int = 100  # FIXME: remove from defaults
     ct_island_size: int | None = 6  # FIXME: remove from defaults
+    ct_dead_wire_removal: bool = True  # FIXME: remove from defaults
 
     @staticmethod
     def from_dict(kwargs):
@@ -391,10 +412,16 @@ class Selection:
 
                             # POT weight: null weight if signal found in non-hyperon file
                             filter_arr["weight"] = (
-                                ak.where(signal_def(filter_arr), 0.0, scale)
+                                ak.where(has_hyperon(filter_arr), 0.0, scale)
                                 if s.type != SampleType.Hyperon
                                 else scale
                             )
+                            match s.type:
+                                case SampleType.Dirt:
+                                    filter_arr["weight"] = (
+                                        filter_arr["weight"] * 0.65
+                                    )  # NuMI dirt weighting
+
                             accum = ak.concatenate((accum, filter_arr), axis=0)
             else:
                 raise TypeError(f"sample {s.file_name} has not been loaded")
@@ -426,7 +453,7 @@ class Selection:
         proxy_cuts = [Cut("proxy_cut", cutfunc) for _ in range(len(params_set))]
 
         for i, iteration in enumerate(params_set):
-            logger.info(f"Iteration {i+1}")
+            logger.info(f"Iteration {i + 1}")
             logger.info(iteration | consts)
             for s in self.samples:
                 scale = self.samples.target_POT / s.POT
