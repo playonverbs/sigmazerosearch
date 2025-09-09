@@ -21,7 +21,7 @@ from sigmazerosearch.selection import (
 def event_sample(request):
     entry_low, entry_high = request.param
     with up.open(
-        "/home/niam/phd/data/hyperons/multiSlice/run3b_RHC/analysisOutputRHC_mSlice_cthorpe_make_hyperon_events_numi_rhc_run3b_hyperon_reco2_reco2.root"
+        "/home/niam/phd/data/hyperons/multiSlice/run3b_RHC/analysisOutputRHC_cttest_Hyperon_ana_hyperon_sigmazero_mSlice_prodgenie_run3b.root"
     ) as fd:
         return fd.get("ana/OutputTree").arrays(
             entry_start=entry_low, entry_stop=entry_high
@@ -35,8 +35,11 @@ def rand_bool_arr():
 
 def test_EventCategory(event_sample):
     # get range of EventCategory enum for check.
-    min, max = np.amin(list(EventCategory)), np.amax(list(EventCategory))
-    res = EventCategory.from_arr(event_sample)
+    min, max = (
+        np.amin([ec.index for ec in EventCategory]),
+        np.amax([ec.index for ec in EventCategory]),
+    )
+    res = EventCategory.from_arr(event_sample, output="code")
 
     assert not ak.any(res < min), "an array value is snaller than the enum minimum"
     assert not ak.any(res > max), "an array value is larger than the enum maximum"

@@ -7,7 +7,7 @@ from sigmazerosearch import loader
 
 def test_loader():
     ntuple = loader.load_ntuple(
-        "/home/niam/phd/data/hyperons/run3b_RHC/analysisOutputRHC_Overlay_GENIE_Hyperon_cthorpe_make_hyperon_events_numi_rhc_run3b_hyperon_reco2_reco2.root:ana/OutputTree"
+        "/home/niam/phd/data/hyperons/multiSlice/run3b_RHC/analysisOutputRHC_cttest_Hyperon_ana_hyperon_sigmazero_mSlice_prodgenie_run3b.root:ana/OutputTree"
     )
 
     assert isinstance(ntuple, up.TTree)
