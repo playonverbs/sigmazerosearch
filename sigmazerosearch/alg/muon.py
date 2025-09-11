@@ -15,16 +15,16 @@ def select_mu_candidate(arr: ak.Array, pset: ParameterSet) -> ak.Array:
     3. Max separation: <project:#ParameterSet.max_separation>
     """
     # XXX: Check that this works for one pfp that satisfies all conditions
-    mask = (
-        (arr["trk_llrpid"] > pset.pid_cut)
-        & (arr["trk_length"] > pset.min_length)
-        & ak.fill_none(
-            ak.any(
+    mask = ak.fill_none(
+        (
+            (arr["trk_llrpid"] > pset.pid_cut)
+            & (arr["trk_length"] > pset.min_length)
+            & (
                 displacement(arr, "trk_start_x", "trk_start_y", "trk_start_z")
-                < pset.max_separation,
-                axis=1,
-            ),
-            False,
-        )
+                < pset.max_separation
+            )
+        ),
+        [],
+        axis=0,
     )
     return mask
