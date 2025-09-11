@@ -23,6 +23,8 @@ def _len(xs):
         (0, 117.48, 0, False),
         (0, 0, 1036.91, False),
         (126.625, 0.97, 0.1, True),
+        (100.0, 3.0, 700.0, False),
+        (1000.0, -124.0, 700.0, False),
     ],
 )
 def test_in_active_tpc(x, y, z, want):

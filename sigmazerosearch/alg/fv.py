@@ -19,6 +19,8 @@ FV_x: Sides = (0.0, 256.35)
 FV_y: Sides = (-115.53, 117.47)
 FV_z: Sides = (0.1, 1036.9)
 
+dead_region_z = (675.1, 775.1)
+
 
 def in_active_tpc(x, y, z, padding: float | None = None):
     """
@@ -35,6 +37,10 @@ def in_active_tpc(x, y, z, padding: float | None = None):
                 y <= FV_y[1],
                 z >= FV_z[0],
                 z <= FV_z[1],
+                np.logical_or(
+                    z <= dead_region_z[0],
+                    z >= dead_region_z[1],
+                ),
             )
         )
     else:
@@ -46,6 +52,10 @@ def in_active_tpc(x, y, z, padding: float | None = None):
                 y <= (FV_y[1] - padding),
                 z >= (FV_z[0] + padding),
                 z <= (FV_z[1] - padding),
+                np.logical_or(
+                    z <= dead_region_z[0],
+                    z >= dead_region_z[1],
+                ),
             )
         )
 
