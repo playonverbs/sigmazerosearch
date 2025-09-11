@@ -5,7 +5,7 @@ Selection contains the main objects for handling the physics selection.
 import logging
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
-from enum import Enum, IntEnum
+from enum import Enum, IntEnum, auto
 from os.path import isabs
 from typing import Callable, Literal, Optional
 
@@ -50,27 +50,31 @@ class EventCategory(EventCategoryMixin, Enum):
 
     EventCategory.from_arr(array, "code") == EventCategory.Signal.index
     ```
+
+    Added enum members should be added in increasing specificity, due to the
+    characteristics of <inv:#numpy.select>.
     """
 
     Other = -1, None
-    Signal = 0, lambda arr: signal_def(arr)
-    Lambda = 1, lambda arr: arr["mc_hyperon_pdg"] == PDG.Lambda.value
+    Signal = auto(), lambda arr: signal_def(arr)
+    Lambda = auto(), lambda arr: arr["mc_hyperon_pdg"] == PDG.Lambda.value
+    OOFV = (auto(), lambda arr: arr["sample"] == SampleType.Dirt.name)
     NuMuCC = (
-        2,
+        auto(),
         lambda arr: np.logical_and.reduce(
             [np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value, arr["mc_ccnc"] == "CC"]
         ),
     )
-    NC = (3, lambda arr: arr["mc_ccnc"] == "NC")
-    NuE = (4, lambda arr: np.abs(arr["mc_nu_pdg"]) == PDG.NuE.value)
+    NC = (auto(), lambda arr: arr["mc_ccnc"] == "NC")
+    NuE = (auto(), lambda arr: np.abs(arr["mc_nu_pdg"]) == PDG.NuE.value)
     NuMuDIS = (
-        5,
+        auto(),
         lambda arr: np.logical_and.reduce(
             [np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value, arr["mc_mode"] == "DIS"]
         ),
     )
     NuMuRES = (
-        6,
+        auto(),
         lambda arr: np.logical_and.reduce(
             [np.abs(arr["mc_nu_pdg"]) == PDG.NuMu.value, arr["mc_mode"] == "RES"]
         ),
