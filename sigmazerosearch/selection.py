@@ -19,7 +19,7 @@ import sigmazerosearch.alg.fv as fv
 import sigmazerosearch.utils as utils
 from sigmazerosearch import loader
 from sigmazerosearch.general import PDG, Config
-from sigmazerosearch.truth import GenType
+from sigmazerosearch.truth import GenEventType, GenType
 
 # ValueUnc = tuple[float, float] | tuple[float, float, float]
 ValueUnc = list[float]
@@ -126,6 +126,10 @@ def signal_def(arr: ak.Array) -> ak.Array:
     applies a mask and returns a boolean array"""
     return np.logical_and.reduce(
         (
+            np.logical_or(
+                arr["mc_mode"] == GenEventType.QEL.name,
+                arr["mc_mode"] == GenEventType.HYP.name,
+            ),
             arr["mc_nu_pdg"] == PDG.NuMu.anti,
             arr["mc_hyperon_pdg"] == PDG.Sigma0.value,
             fv.in_active_tpc(
