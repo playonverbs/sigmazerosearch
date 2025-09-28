@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 import uproot as up
 
@@ -36,4 +37,16 @@ def test_window_to_map_numpy(event_sample, benchmark):
     plt.gca().set_title("_window_to_map")
     plt.matshow(island._window_to_map(windows[0], 250, 100))
     plt.gca().set_title("_window_to_map_numpy")
+    plt.show()
+
+
+def test_window_to_map_diff(event_sample):
+    windows = event_sample.ct_test_window_plane0
+
+    map_single = island._window_to_map(windows[0], 250, 100)
+    map_numpy = island._window_to_map_numpy(windows[0], 250, 100)
+
+    diff = np.abs(map_numpy - map_single)
+    plt.matshow(diff)
+    plt.gca().set_title(rf"$|\Delta \mathrm{{map}}|$ [{np.min(diff)}, {np.max(diff)}]")
     plt.show()
