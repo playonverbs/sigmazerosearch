@@ -55,6 +55,13 @@ class EventCategory(EventCategoryMixin, Enum):
     characteristics of <inv:#numpy.select>.
     """
 
+    @staticmethod
+    def _generate_next_value_(name, start, count, last_values):
+        if isinstance(last_values[-1], tuple):
+            return last_values[-1][0] + 1
+        else:
+            return last_values[-1] + 1
+
     Other = -1, None
     Signal = auto(), lambda arr: signal_def(arr)
     Lambda = auto(), lambda arr: arr["mc_hyperon_pdg"] == PDG.Lambda.value
