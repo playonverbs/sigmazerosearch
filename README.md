@@ -3,6 +3,8 @@
 > A loose python framework to help perform a particle physics selection for
 > hyperons using MicroBooNE data files.
 
+- [Documentation](https://playonverbs.github.io/sigmazerosearch)
+
 This project has dependencies managed by uv, use it to create a new virtualenv
 to house dependencies for this project.
 
