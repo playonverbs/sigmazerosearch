@@ -169,7 +169,11 @@ tags
 plots/*
 !plots/*.mplstyle
 
-# ignore ROOT TMVA output directory
+# ignore ROOT TMVA output directory and data files
 scripts/dataset
-*.o
 *.root
+
+# ignore C/C++ object files
+*.o
+
+eventlists/
