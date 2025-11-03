@@ -80,11 +80,12 @@ class PDG(IntEnum):
     Sigma0 = 3212
     SigmaM = 3112
     SigmaP = 3222
+    Unknown = -1
 
     @property
     def anti(self) -> int:
         """Gets the anti-particle pdg code value excluding neutral particles"""
-        neutrals = [PDG.Lambda, PDG.Neutron, PDG.Photon] + [
+        neutrals = [PDG.Lambda, PDG.Neutron, PDG.Photon, PDG.Unknown] + [
             x for x in PDG if x.name.endswith("0")
         ]
         if self in neutrals:
