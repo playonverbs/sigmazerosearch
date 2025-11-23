@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "sigmazerosearch"
-copyright = "2024, Niam Patel"
+copyright = "2025, Niam Patel"
 author = "Niam Patel"
 
 # -- General configuration ---------------------------------------------------
