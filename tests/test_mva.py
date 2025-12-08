@@ -23,7 +23,8 @@ def Selection_array():
             iterate=True,
             iterate_step="50MB",
             branch_list=(
-                defaults.config_no_bdt.branch_list + ["pfp_x", "pfp_y", "pfp_z"]  # type: ignore
+                defaults.config_no_bdt.branch_list
+                + ["pfp_x", "pfp_y", "pfp_z", "mc_mode"]  # type: ignore
             ),
         ),
         cuts=[
