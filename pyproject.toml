@@ -20,6 +20,7 @@ dependencies = [
     "particle>=0.25.4",
     "pyqt6>=6.9.1",
     "click>=8.2.1",
+    "pyarrow>=22.0.0",
 ]
 
 [dependency-groups]
