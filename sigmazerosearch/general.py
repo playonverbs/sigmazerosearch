@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Iterable
 
 
-@dataclass
+@dataclass(slots=True)
 class Config:
     """
     Config represents configuration options that will affect the operation of

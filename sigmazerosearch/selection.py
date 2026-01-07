@@ -214,7 +214,7 @@ class Cut:
         return f"<Cut name={self.name} passing={self.n_passing} signal={self.n_signal} background={self.n_background}>"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ParameterSet:
     """
     Wraps all selection parameter values.
