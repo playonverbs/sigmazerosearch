@@ -134,7 +134,15 @@ def count_event_islands(
 ) -> ak.Array:
     """
     Takes a sample <inv:#ak.Array> and returns the number of islands found in
-    each plane in each event
+    each plane in each event.
+
+    :return:
+        An <inv:#ak.Array> of records with the following fields counting the
+        number of filtered islands in each wire plane:
+
+        - `ct_test_islands_plane0`
+        - `ct_test_islands_plane1`
+        - `ct_test_islands_plane2`
     """
     filter_sizes = pset.ct_island_size is not None
 
