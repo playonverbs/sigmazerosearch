@@ -2,6 +2,7 @@
 Selection contains the main objects for handling the physics selection.
 """
 
+import inspect
 import logging
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
@@ -194,6 +195,26 @@ class Cut:
         self.n_background[0] += scale * ak.sum(~signal_def(arr[cond]), axis=None)
         self.n_passing[0] += scale * ak.sum(cond, axis=None)
 
+    def save_state(self) -> dict:
+        """
+        :::{seealso}
+        The documentation for <project:#Selection.save_state>.
+        :::
+        """
+        try:
+            cutfunc_source = inspect.getsource(self.cutfunc)
+        except Exception:
+            cutfunc_source = None
+
+        return {
+            "name": self.name,
+            "cutfunc": cutfunc_source,
+            "n_passing": self.n_passing,
+            "n_signal": self.n_signal,
+            "n_background": self.n_background,
+            "total_signal": self.total_signal,
+        }
+
     def __call__(self, *args):
         """Allow an instance of Cut to be used like its cutfunc"""
         return self.cutfunc(*args)
@@ -309,6 +330,21 @@ class Sample:
         if not isabs(self.file_name):
             raise OSError
         self.df = loader.load_ntuple(self.file_name + ":ana/OutputTree")
+
+    def save_state(self) -> dict:
+        """
+        :::{seealso}
+        The documentation for <project:#Selection.save_state>.
+        :::
+        """
+        return {
+            "name": self.name,
+            "file_name": self.file_name,
+            "type": self.type.name,
+            "POT": self.POT,
+            "is_data": self.is_data,
+            "gen_type": self.gen_type.name,
+        }
 
     def _validate_(self) -> bool:
         if self.POT < 0:
@@ -493,6 +529,19 @@ class Selection:
                     raise TypeError(f"sample {s.file_name} has not been loaded")
 
         return np.array([[cut.eff(), cut.pur()] for cut in proxy_cuts])
+
+    def save_state(self, omit_events=False):
+        """
+        Save the current state to an intermediate object.
+
+        Includes all defined <project:#Cut>, <project:#Sample> objects and by
+        default the filtered entries at the end point of the selection.
+        """
+
+        if omit_events:
+            pass
+
+        return NotImplemented
 
     def plot_reco_effs(self, signal=True) -> None:
         pdgs = [PDG.Photon.value, PDG.Proton.value, PDG.Pi.anti, PDG.Muon.anti]
