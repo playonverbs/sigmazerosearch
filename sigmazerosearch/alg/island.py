@@ -155,7 +155,7 @@ def count_event_islands(
     # TODO: add option for selecting wire view
 
     for i, window in enumerate(arr.ct_test_window_plane0):
-        map = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+        map = _window_to_map_numpy(window, pset.ct_time_bins, pset.ct_wire_window)
         if pset.ct_dead_wire_removal:
             map = remove_dead_window_channels(map, dead_wire_map[0], nu_wires[i, 0])
         labelled = _find_map_islands(map)
@@ -164,7 +164,7 @@ def count_event_islands(
         islands["ct_test_islands_plane0"].append(labelled[1])
 
     for i, window in enumerate(arr.ct_test_window_plane1):
-        map = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+        map = _window_to_map_numpy(window, pset.ct_time_bins, pset.ct_wire_window)
         if pset.ct_dead_wire_removal:
             map = remove_dead_window_channels(map, dead_wire_map[1], nu_wires[i, 1])
         labelled = _find_map_islands(map)
@@ -173,7 +173,7 @@ def count_event_islands(
         islands["ct_test_islands_plane1"].append(labelled[1])
 
     for i, window in enumerate(arr.ct_test_window_plane2):
-        map = _window_to_map(window, pset.ct_time_bins, pset.ct_wire_window)
+        map = _window_to_map_numpy(window, pset.ct_time_bins, pset.ct_wire_window)
         if pset.ct_dead_wire_removal:
             map = remove_dead_window_channels(map, dead_wire_map[2], nu_wires[i, 2])
         labelled = _find_map_islands(map)
