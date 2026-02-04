@@ -103,7 +103,7 @@ def _window_to_map(window: ak.Array, time_bins: int, wires_max: int):
     h.fill_flattened(time=times, wire=wires)
 
     # XXX: think about this unsafe casting
-    return np.clip(np.flip(h.values().T, 0), 0, 1, dtype=np.int32, casting="unsafe")
+    return np.clip(np.flip(h.values().T, 0), 0, 1, dtype=np.int8, casting="unsafe")
 
 
 def _window_to_map_numpy(window: ak.Array, time_bins: int, wires_max: int):
@@ -122,7 +122,7 @@ def _window_to_map_numpy(window: ak.Array, time_bins: int, wires_max: int):
         range=((0, 7500), (0, wires_max)),
     )
 
-    return np.clip(np.flip(h.T, 0), 0, 1, dtype=np.int32, casting="unsafe")
+    return np.clip(np.flip(h.T, 0), 0, 1, dtype=np.int8, casting="unsafe")
 
 
 def _find_map_islands(window: ak.Array):
