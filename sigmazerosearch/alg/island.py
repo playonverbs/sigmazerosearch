@@ -192,7 +192,7 @@ def remove_dead_window_channels(window, dead_wires, nu_wire):
     the window.
     """
     transposed = ak.local_index(window, axis=0) - (len(window) // 2) + nu_wire
-    mask = np.isin(transposed, dead_wires)
+    mask = np.flip(np.isin(transposed, dead_wires))
 
     return window[~mask]
 
