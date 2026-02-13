@@ -18,10 +18,16 @@ datashape expression for this is:
 ```
 
 The size of the wire window (number of wires) and the minimum ADC threshold
-value are used and applied upstream in the
+value are defined and applied upstream in the
 [LArSoft module](https://github.com/playonverbs/HyperonProduction).
 
-> Unresponsive wire regions have yet to be handled by this code.
+:::{important}
+Unresponsive wires are now handled by this module.
+
+These methods use a dead-wire map describing the inoperative channels on each
+wire view and which are loaded via the <project:#loader.load_dead_wire_map>
+function.
+:::
 """
 
 from typing import Literal
