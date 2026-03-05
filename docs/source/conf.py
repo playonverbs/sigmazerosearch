@@ -64,7 +64,7 @@ templates_path = ["_templates"]
 exclude_patterns = []
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3.12", None),
+    "python": ("https://docs.python.org/3.14", None),
     "uproot": ("https://uproot.readthedocs.io/en/latest", None),
     "awkward-array": ("https://awkward-array.org/doc/stable", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
