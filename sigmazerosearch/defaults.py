@@ -39,6 +39,18 @@ cthorpe_RHC_Tune_397 = ParameterSet(
 Corresponds to [Frozen RHC Tune 397](https://github.com/cthorpe123/HyperonAnalysis/blob/master/ParameterSets/Parameters.h#L53)
 """
 
+npatel_RHC_Tune = ParameterSet(
+    min_length=10,
+    max_separation=1,
+    separation_cut=3,
+    pid_cut=0.6,
+    proton_pid_cut=0.1,
+    pion_pid_cut=-0.1,
+    w_lambda_min=1,
+    w_lambda_max=2,
+    ct_island_size=6,
+)
+
 config = Config(
     plot_save=True,
     plot_dir=Path("plots/"),
@@ -47,6 +59,7 @@ config = Config(
     perf_percent=True,
     iterate=True,
     iterate_step="40 MB",
+    # iterate_step="60 MB",
     branch_list=[
         "run",
         "subrun",
@@ -58,6 +71,7 @@ config = Config(
         "reco_primary_vtx_z",
         "pfp_trk_shr_score",
         "mc_nu_pdg",
+        "mc_mode",
         "mc_hyperon_pdg",
         "mc_nu_pos_x",
         "mc_nu_pos_y",
@@ -69,6 +83,9 @@ config = Config(
         "trk_start_y",
         "trk_start_z",
         "pfp_photon_bdt_score",
+        "pfpnplanehits_U",
+        "pfpnplanehits_V",
+        "pfpnplanehits_Y",
         "ct_test_window_plane0",
         "ct_test_window_plane1",
         "ct_test_window_plane2",
@@ -89,6 +106,7 @@ config_no_window = config.with_(
             "reco_primary_vtx_z",
             "pfp_trk_shr_score",
             "mc_nu_pdg",
+            "mc_mode",
             "mc_hyperon_pdg",
             "mc_nu_pos_x",
             "mc_nu_pos_y",
@@ -100,6 +118,14 @@ config_no_window = config.with_(
             "trk_start_y",
             "trk_start_z",
             "pfp_photon_bdt_score",
+            "pfp_true_pdg",
+            "pfp_x",
+            "pfp_y",
+            "pfp_z",
+            "pfpnplanehits_U",
+            "pfpnplanehits_V",
+            "pfpnplanehits_Y",
+            "shr_length",
         ]
     }
 )
@@ -116,6 +142,8 @@ config_no_bdt = config.with_(
             "reco_primary_vtx_y",
             "reco_primary_vtx_z",
             "pfp_trk_shr_score",
+            "pfp_true_pdg",
+            "pfp_true_origin",
             "mc_nu_pdg",
             "mc_hyperon_pdg",
             "mc_nu_pos_x",
@@ -131,6 +159,11 @@ config_no_bdt = config.with_(
             "ct_test_window_plane1",
             "ct_test_window_plane2",
             "ct_test_primary_vtx_wires",
+            "shr_length",
+            "shr_open_angle",
+            "pfpnplanebits_U",
+            "pfpnplanehits_V",
+            "pfpnplanehits_Y",
         ]
     }
 )
