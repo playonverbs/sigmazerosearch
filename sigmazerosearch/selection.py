@@ -4,6 +4,7 @@ Selection contains the main objects for handling the physics selection.
 
 import inspect
 import logging
+import pathlib
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
 from enum import Enum, IntEnum, auto
@@ -13,6 +14,7 @@ from typing import Callable, Literal, Optional
 import awkward as ak
 import matplotlib.pyplot as plt
 import numpy as np
+import uproot as up
 from tabulate import tabulate
 from uproot.behaviors.TBranch import HasBranches
 
@@ -338,9 +340,6 @@ class Sample:
         :::
         """
         return {
-            "name": self.name,
-            "file_name": self.file_name,
-            "type": self.type.name,
             "POT": self.POT,
             "is_data": self.is_data,
             "gen_type": self.gen_type.name,
@@ -530,18 +529,33 @@ class Selection:
 
         return np.array([[cut.eff(), cut.pur()] for cut in proxy_cuts])
 
-    def save_state(self, omit_events=False):
+    def save_state(self, arr: ak.Array, output_path: str | pathlib.Path):
         """
-        Save the current state to an intermediate object.
+        Save the current state to an intermediate ROOT file as a set of
+        RDataFrames.
 
         Includes all defined <project:#Cut>, <project:#Sample> objects and by
         default the filtered entries at the end point of the selection.
+
+        :::{seealso}
+        The ROOT documentation for `RDataFrame` can be seen at
+        https://root.cern/doc/master/classROOT_1_1RDataFrame.html.
+        :::
         """
+        samples = ak.Array([sample.save_state() for sample in self.samples])
+        cuts = ak.Array([cut.save_state() for cut in self.cuts])
+        pset = ak.Array([asdict(self.parameters)])
+        # config = ak.Array([asdict(self.config)])
+        # branch_list = self.config.branch_list
 
-        if omit_events:
-            pass
+        with up.create(output_path) as fd:
+            fd.mkrntuple("sigmazerosearch/cuts", cuts)
+            # fd.mkrntuple("sigmazerosearch/config", config)
+            fd.mkrntuple("sigmazerosearch/parameters", pset)
+            fd.mkrntuple("sigmazerosearch/samples", samples)
+            fd.mkrntuple("sigmazerosearch/events", arr)
 
-        return NotImplemented
+        logger.info(f"successfully wrote state to {output_path}")
 
     def plot_reco_effs(self, signal=True) -> None:
         pdgs = [PDG.Photon.value, PDG.Proton.value, PDG.Pi.anti, PDG.Muon.anti]
@@ -747,3 +761,18 @@ class Selection:
                 )
         else:
             print_table(format)
+
+    @staticmethod
+    def load_state(filename: str | pathlib.Path):
+        """Creates a Selection from a path to a state file"""
+        # FIXME: import other exported data: samples, cuts, parameters
+
+        with up.open(filename) as fd:
+            root_folder = "sigmazerosearch"
+
+            parameters = ParameterSet(
+                **fd.get(f"{root_folder}/parameters").arrays().to_list().pop()  # type: ignore
+            )
+            events = fd.get(f"{root_folder}/events").arrays()  # type: ignore
+
+        return events, parameters
