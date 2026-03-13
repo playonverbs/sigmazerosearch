@@ -10,6 +10,7 @@ from typing import Literal
 import awkward as ak
 import hist
 import numpy as np
+import particle as part
 import vector
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -35,7 +36,7 @@ class WireGeometry:
     C_T = 818.351
 
     cos60 = 0.5
-    sin60 = np.sqrt(3) / 2.0
+    sin60 = np.sqrt(3.0) / 2.0
 
     @classmethod
     def pos_to_u(cls, x, y, z):
@@ -65,6 +66,9 @@ class WireGeometry:
 
 
 def _save_plot(config: Config, fig: Figure, title: str):
+    if config.plot_dir is None:
+        raise ValueError("please provide a valid value of config.plot_dir")
+
     if isinstance(config.plot_format, list):
         for format in config.plot_format:
             fig.savefig(
@@ -89,6 +93,16 @@ def _save_plot(config: Config, fig: Figure, title: str):
 
 def hist_filter_stack(stack: hist.Stack) -> hist.Stack:
     return hist.Stack.from_iter(filter(lambda s: not s.empty(), stack))
+
+
+def hist_label_per_particle(stack: hist.Stack) -> hist.Stack:
+    for i in stack:
+        i.name = (
+            f"${part.Particle.from_pdgid(i.name).latex_name}$"
+            if i.name != -1
+            else "N/A"
+        )
+    return stack
 
 
 def hist_bin_label(
