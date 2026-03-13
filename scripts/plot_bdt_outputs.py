@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import uproot as up
 
+PLOT_DIR = "plots/MVA/"
+
 
 @dataclass
 class Variable:
@@ -171,7 +173,7 @@ def main(args):
             ax.legend()
             if args.save:
                 fig.savefig(
-                    f"MVA_input_{var.name.replace(' ', '_').replace('/', '_')}.{args.ext}",
+                    f"{PLOT_DIR}MVA_input_{var.name.replace(' ', '_').replace('/', '_')}.{args.ext}",
                     bbox_inches="tight",
                 )
 
@@ -213,7 +215,9 @@ def main(args):
         ax.set_xlabel("BDT Response")
         ax.legend()
         if args.save:
-            fig.savefig(f"MVA_{method}_response.{args.ext}", bbox_inches="tight")
+            fig.savefig(
+                f"{PLOT_DIR}MVA_{method}_response.{args.ext}", bbox_inches="tight"
+            )
 
         # for sig, sig_train, bkg, bkg_train in responses:
         #     alpha = 0.2
@@ -254,7 +258,10 @@ def main(args):
         # ax.tick_params(axis="x", labelrotation=30)
         plt.xticks(rotation=30, ha="right")
         if args.save:
-            fig.savefig(f"MVA_input_corr_matrix_signal.{args.ext}", bbox_inches="tight")
+            fig.savefig(
+                f"{PLOT_DIR}MVA_input_corr_matrix_signal.{args.ext}",
+                bbox_inches="tight",
+            )
 
         fig, ax = plt.subplots()
         bkg_corr.plot2d(ax=ax, labels=True)
@@ -272,7 +279,8 @@ def main(args):
         plt.xticks(rotation=30, ha="right")
         if args.save:
             fig.savefig(
-                f"MVA_input_corr_matrix_background.{args.ext}", bbox_inches="tight"
+                f"{PLOT_DIR}MVA_input_corr_matrix_background.{args.ext}",
+                bbox_inches="tight",
             )
 
         plt.show()
@@ -304,11 +312,17 @@ def main(args):
                 ec="tab:red",
             )
             ax.axvline(optimum, color="lightgrey", linestyle="dashed")
+
+            ax.set_ylabel("Efficiency")
+            ax2.set_ylabel("Significance")
             h2, l2 = ax2.get_legend_handles_labels()
             ax.legend(h1 + h2, l1 + l2, title=method)
 
             if args.save:
-                fig.savefig(f"MVA_{method}_performance.{args.ext}", bbox_inches="tight")
+                fig.savefig(
+                    f"{PLOT_DIR}MVA_{method}_performance.{args.ext}",
+                    bbox_inches="tight",
+                )
 
         plt.show()
 
@@ -339,7 +353,7 @@ def plot_roc(
     ax.set_ylabel("Background Rejection")
     ax.legend()
     if args.save:
-        fig.savefig(f"MVA_ROC_curve.{args.ext}")
+        fig.savefig(f"{PLOT_DIR}MVA_ROC_curve.{args.ext}")
     plt.show()
 
 

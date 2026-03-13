@@ -10,10 +10,9 @@ plt.style.use("./plots/sigmazerosearch.tex.mplstyle")
 
 @dataclass
 class Params:
-    # p_thresh_p: float = 300.0 # MeV
     p_thresh_p: float = 0.3  # GeV
-    # p_thresh_pi: float = 100.0 # MeV
     p_thresh_pi: float = 0.1  # GeV
+    p_thresh_gamma: float = 0.1  # GeV
 
 
 def lambda_fraction(mom_lambda: float, params: Params = Params()) -> float:
@@ -34,8 +33,6 @@ def lambda_fraction(mom_lambda: float, params: Params = Params()) -> float:
     beta = mom_lambda / np.sqrt((mom_lambda**2) + (m_lambda**2))
     gamma = 1 / np.sqrt(1 - (beta**2))
 
-    # print(f"p_lambda = {mom_lambda:.2f}\tbeta = {beta:.2f}\tgamma = {gamma:.2f}")
-
     A = max(
         (
             (np.sqrt((m_p**2) + (abs(p_thresh_p) ** 2)) - (gamma * E_p))
@@ -52,15 +49,28 @@ def lambda_fraction(mom_lambda: float, params: Params = Params()) -> float:
         1.0,
     )
 
-    # print(f"A = {A:.2f}\tB = {B:.2f}")
-
     if A > B:
         return 0
     else:
         return 0.5 * (B - A)
 
 
-def main():
+def sigma_fraction(mom_sigma: float, params: Params = Params()) -> float:
+    m_sigma = 1.192642  # GeV
+    m_lambda = 1.115683  # GeV
+
+    p_gamma = ((m_sigma**2) - (m_lambda**2)) / (2 * m_sigma)
+    p_lambda = ((m_sigma**2) + (m_lambda**2)) / (2 * m_sigma)
+
+    # p_thresh_lambda = params.p_thresh_p + params.p_thresh_pi
+
+    print(f"p_gamma = {p_gamma:.2f} GeV\np_lambda = {p_lambda:.2f} GeV")
+
+    # beta = mom_sigma / np.sqrt((mom_sigma**2) + (m_sigma**2))
+    # gamma = 1 / np.sqrt(1 - (beta**2))
+
+
+def plot_lambda_phase_space():
     inputs = np.arange(0, 2.5, 0.001)
 
     outputs = []
@@ -78,7 +88,7 @@ def main():
     ax.text(
         0.975,
         0.05,
-        f"$p^\mathrm{{thresh}}_p = {Params().p_thresh_p}$ GeV\n$p^\mathrm{{thresh}}_\pi = {Params().p_thresh_pi}$ GeV",
+        f"$p^\\mathrm{{thresh}}_p = {Params().p_thresh_p}$ GeV\n$p^\\mathrm{{thresh}}_\\pi = {Params().p_thresh_pi}$ GeV",
         transform=ax.transAxes,
         ha="right",
     )
@@ -89,6 +99,11 @@ def main():
     utils._save_plot(defaults.config, fig, "partial_phase_space_lambda")
 
     plt.show()
+
+
+def main():
+    plot_lambda_phase_space()
+    sigma_fraction(0.0)
 
 
 if __name__ == "__main__":

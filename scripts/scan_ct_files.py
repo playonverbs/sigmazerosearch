@@ -4,12 +4,14 @@ from pathlib import Path
 import awkward as ak
 import hist
 import matplotlib.pyplot as plt
+import numpy as np
 import uproot as up
 
 import sigmazerosearch.alg.island as island
 
 plt.style.use("plots/sigmazerosearch.tex.mplstyle")
 pat = re.compile(r".*_(\d+.\d+)_(\d+)w.*.root")
+inverted_cmap = plt.colormaps.get("viridis")
 
 nevent: int = 0
 
@@ -52,28 +54,29 @@ def scan_both():
         assert threshold == marr.ConnectednessThreshold[0]
         assert window == marr.ConnectednessWindowW[0]
 
+        islands = island._window_to_map(arr[nevent].ct_test_window_plane1, 500, window)[
+            1
+        ]
         isles["threshold"].append(threshold)
         isles["window"].append(window)
-        isles["islands"].append(
-            island._window_to_map(arr[nevent].ct_test_window_plane0, 500, window)[1]
-        )
+        isles["islands"].append(islands)
 
         timebins = 250
         nwires = window
         h0 = (
             hist.Hist.new.Regular(
-                timebins, 0, 7500, name="plane0", label="Plane 0 Time [tick]"
+                timebins, 0, 7500, name="plane1", label="Plane 1 Time [tick]"
             )
             .Integer(0, nwires, name="wire", label="Relative Wire")
             .Double()
         )
 
         wires, times = ak.broadcast_arrays(
-            ak.local_index(arr.ct_test_window_plane0[nevent], axis=0),
-            arr.ct_test_window_plane0[nevent],
+            ak.local_index(arr.ct_test_window_plane1[nevent], axis=0),
+            arr.ct_test_window_plane1[nevent],
         )
 
-        h0.fill_flattened(plane0=times, wire=wires)
+        h0.fill_flattened(plane1=times, wire=wires)
 
         # fig, ax = plt.subplots(figsize=(14, 10))
 
@@ -88,7 +91,7 @@ def scan_both():
         ax.text(
             0.95,
             0.95,
-            f"{threshold} ADC\n{window} wires",
+            f"{threshold} ADC\n{window} wires\n{islands} islands",
             transform=ax.transAxes,
             ha="right",
             va="top",
@@ -146,9 +149,9 @@ def scan_adc():
         window = marr.ConnectednessWindowW[0]
         print(f"Minimum threshold: {threshold} ADC, Wire window: {window} wires")
 
-        islands = island._window_to_map(arr[nevent].ct_test_window_plane0, 500, window)[
-            1
-        ]
+        pic, islands = island._window_to_map(
+            arr[nevent].ct_test_window_plane1, 500, window
+        )
         isles["threshold"].append(threshold)
         isles["window"].append(window)
         isles["islands"].append(islands)
@@ -157,22 +160,29 @@ def scan_adc():
         nwires = window
         h0 = (
             hist.Hist.new.Regular(
-                timebins, 0, 7500, name="plane0", label="Plane 0 Time [tick]"
+                timebins, 0, 7500, name="plane1", label="Plane 0 Time [tick]"
             )
             .Integer(0, nwires, name="wire", label="Relative Wire")
             .Double()
         )
 
         wires, times = ak.broadcast_arrays(
-            ak.local_index(arr.ct_test_window_plane0[nevent], axis=0),
-            arr.ct_test_window_plane0[nevent],
+            ak.local_index(arr.ct_test_window_plane1[nevent], axis=0),
+            arr.ct_test_window_plane1[nevent],
         )
 
-        h0.fill_flattened(plane0=times, wire=wires)
+        h0.fill_flattened(plane1=times, wire=wires)
 
         # fig, ax = plt.subplots(figsize=(14, 10))
 
-        h0.plot(ax=ax, cbar=False)
+        ax.matshow(np.flip(pic.T, 0))
+        # ax.imshow(
+        #     np.flip(pic.T, 0),
+        #     norm="linear",
+        #     interpolation="none",
+        #     # extent=(0, 250, 0, 100),
+        # )
+        # h0.plot(ax=ax, cbar=False)
         ax.axhline(
             window / 2, color="lightgrey", linestyle="dashed", alpha=0.4
         )  # draw central line for reco vertex position.
@@ -200,7 +210,7 @@ def scan_adc():
     fig.supxlabel("Time ticks")
     fig.supylabel("Relative Wire Numbers")
     # fig.suptitle(f"Collection Plane {rse}", x=0.125, y=0.905, ha="left")
-    fig.suptitle(f"Collection Plane {rse}")
+    fig.suptitle(f"plane1 {rse}")
     # plt.savefig(
     #     f"plots/ct_scanned_heatmaps_{rse[0]}-{rse[1]}-{rse[2]}.png", bbox_inches="tight"
     # )
