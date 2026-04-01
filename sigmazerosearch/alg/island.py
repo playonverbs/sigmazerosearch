@@ -118,12 +118,12 @@ def _window_to_map_numpy(window: ak.Array, time_bins: int, wires_max: int):
     functions.
     """
 
-    wires, times = ak.broadcast_arrays(ak.local_index(window, axis=0), window)
+    wires, times = np.broadcast_arrays(np.arange(wires_max), window)
 
     # XXX: How does this handle null values (wires with no hits)?
     h, _, _ = hist.numpy.histogram2d(
-        ak.flatten(times),
-        ak.flatten(wires),
+        np.ravel(times),
+        np.ravel(wires),
         bins=(time_bins, wires_max),
         range=((0, 7500), (0, wires_max)),
     )
