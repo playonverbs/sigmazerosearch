@@ -89,7 +89,7 @@ def filter_window_sizes(islands, pset: ParameterSet):
     lengths = ak.Array(compute_island_sizes(islands))
     indices = ak.local_index(lengths)[lengths >= pset.ct_island_size] + 1
 
-    return np.where(np.isin(lbls, ak.to_numpy(indices)), lbls, 0), len(indices)
+    return np.where(np.isin(lbls, ak.to_numpy(indices)), lbls, 0), indices
 
 
 # TODO: change from using hist.Hist to np.histogram2d
@@ -132,7 +132,8 @@ def _window_to_map_numpy(window: ak.Array, time_bins: int, wires_max: int):
 
 
 def _find_map_islands(window: ak.Array):
-    return ndi.label(window, structure=LABEL_STRUCTURE)
+    output = ndi.label(window, structure=LABEL_STRUCTURE)
+    return output[0], np.arange(1, output[1] + 1)
 
 
 def count_event_islands(
