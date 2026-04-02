@@ -47,6 +47,7 @@ packages is available in <project:#dependencies>.
 
 usage
 dependencies
+structures
 api/index
 ```
 
