@@ -36,6 +36,8 @@ import awkward as ak
 import hist
 import numpy as np
 import scipy.ndimage as ndi
+import scipy.spatial.distance as dist
+from numpy.typing import ArrayLike
 
 from sigmazerosearch.selection import ParameterSet
 
@@ -137,7 +139,7 @@ def _find_map_islands(window: ak.Array):
 
 
 def count_event_islands(
-    arr: ak.Array, pset: ParameterSet, dead_wire_map=None, nu_wires=None
+    arr: ak.Array, pset: ParameterSet, dead_wire_map=None, nu_wires=None, merge=False
 ) -> ak.Array:
     """
     Takes a sample <inv:#ak.Array> and returns the number of islands found in
@@ -168,7 +170,9 @@ def count_event_islands(
         labelled = _find_map_islands(map)
         if filter_sizes:
             labelled = filter_window_sizes(labelled, pset)
-        islands["ct_test_islands_plane0"].append(labelled[1])
+        if merge:
+            labelled = simple_island_merge(labelled[0], labelled[1])
+        islands["ct_test_islands_plane0"].append(len(labelled[1]))
 
     for i, window in enumerate(arr.ct_test_window_plane1):
         map = _window_to_map_numpy(window, pset.ct_time_bins, pset.ct_wire_window)
@@ -177,7 +181,9 @@ def count_event_islands(
         labelled = _find_map_islands(map)
         if filter_sizes:
             labelled = filter_window_sizes(labelled, pset)
-        islands["ct_test_islands_plane1"].append(labelled[1])
+        if merge:
+            labelled = simple_island_merge(labelled[0], labelled[1])
+        islands["ct_test_islands_plane1"].append(len(labelled[1]))
 
     for i, window in enumerate(arr.ct_test_window_plane2):
         map = _window_to_map_numpy(window, pset.ct_time_bins, pset.ct_wire_window)
@@ -186,7 +192,9 @@ def count_event_islands(
         labelled = _find_map_islands(map)
         if filter_sizes:
             labelled = filter_window_sizes(labelled, pset)
-        islands["ct_test_islands_plane2"].append(labelled[1])
+        if merge:
+            labelled = simple_island_merge(labelled[0], labelled[1])
+        islands["ct_test_islands_plane2"].append(len(labelled[1]))
 
     return ak.zip(islands)
 
@@ -202,6 +210,67 @@ def remove_dead_window_channels(window, dead_wires, nu_wire):
     mask = np.flip(np.isin(transposed, dead_wires))
 
     return window[~mask]
+
+
+def simple_island_merge(
+    window: ArrayLike,
+    labels: ArrayLike,
+    distance: int | float = 2,
+) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
+    """
+    Attempts to merge linear-going islands within `window` by finding their
+    maximum and minimum positions and checking if other islands are within
+    `distance` pixels of them. If suitable candidate islands are found, then of
+    the connected pairs of islands the higher index of island is moved to
+    `index - 1`.
+
+    The default distance metric used is the Chebyshev distance. Currently this
+    is the only supported metric.
+
+    `window` should be a labelled window of an event, which is a 2-dimensional
+    array containing integers representing the presence of event ionisation
+    activity.
+
+    :return:
+        A tuple of three objects containing:
+        1. The window with close islands merged.
+        2. An array of non-contiguous island indices that remain.
+        3. A distance matrix between all island extrema positions.
+    """
+
+    # change to a list of labels
+    label_arr = np.array(labels)
+
+    def get_extrema_positions(window, labels):
+        """
+        Returns a pair of coordinates corresponding to the maximum and minimum
+        locations of elements in each label
+        """
+
+        maxs = np.zeros((len(labels), 2), dtype=int)
+        mins = np.zeros((len(labels), 2), dtype=int)
+
+        for i, label in enumerate(labels):
+            coords = np.argwhere(window == label)
+            maxs[i] = np.max(coords, axis=0)
+            mins[i] = np.min(coords, axis=0)
+
+        return mins, maxs
+
+    mins, maxs = get_extrema_positions(window, label_arr)
+
+    dmatrix = dist.cdist(np.array(mins), np.array(maxs), "chebyshev")
+
+    args = np.argwhere(dmatrix <= 2)
+    pairs = args[args[:, 0] != args[:, 1]] + 1
+
+    merged_islands = window.copy()
+
+    for pair in pairs:
+        merged_islands[np.nonzero(merged_islands == pair[1])] = pair[0]
+
+    # slice out the first item as it's the 0 index background
+    return merged_islands, np.unique(merged_islands)[1:], dmatrix
 
 
 def make_event_map(arr: ak.Array, pset: ParameterSet) -> ak.Array:
