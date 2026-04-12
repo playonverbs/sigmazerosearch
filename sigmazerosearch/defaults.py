@@ -161,7 +161,7 @@ config_no_bdt = config.with_(
             "ct_test_primary_vtx_wires",
             "shr_length",
             "shr_open_angle",
-            "pfpnplanebits_U",
+            "pfpnplanehits_U",
             "pfpnplanehits_V",
             "pfpnplanehits_Y",
         ]
