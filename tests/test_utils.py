@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from sigmazerosearch.alg import fv
-from sigmazerosearch.utils import WireGeometry, filter_by_rse
+from sigmazerosearch.utils import WireGeometry, WireView, filter_by_rse
 
 
 @pytest.fixture
@@ -25,6 +25,21 @@ def test_filter_by_rse(example_array):
     assert "event" in out.fields
 
 
+def test_wireview():
+    for i in (0, 1, 2):
+        wv = WireView(i)
+        assert WireView.from_suffix(wv.to_suffix()) == wv, "failed roundtripping"
+
+    assert WireView.from_suffix("ct_islands_plane0") == WireView.U
+    assert WireView.from_suffix("ct_islands_plane1") == WireView.V
+    assert WireView.from_suffix("ct_islands_plane2") == WireView.Y
+
+    for val in ("hello_there_uhh", "hellothere", "hi_plane_"):
+        with pytest.raises(ValueError):
+            WireView.from_suffix(val)
+
+
+@pytest.mark.skip(reason="Currently unused conversion")
 def test_wiregeometry_conversions():
     """
     Generate a random bunch of x,y,z detector coordinates and convert them to

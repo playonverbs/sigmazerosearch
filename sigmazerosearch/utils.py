@@ -5,6 +5,7 @@ Mixed utility functions.
 import logging
 import pathlib
 import sys
+from enum import IntEnum
 from typing import Literal
 
 import awkward as ak
@@ -63,6 +64,33 @@ class WireGeometry:
     def wire_boundaries(cls):
         """Returns plane wire ID boundaries starting from 1"""
         return np.array([0, 2400, 2400 + 2400, 2400 + 2400 + 3456])
+
+
+class WireView(IntEnum):
+    U = 0
+    V = 1
+    Y = 2
+
+    def is_collection(self):
+        return self is WireView.U
+
+    def is_induction(self):
+        return (self is WireView.V) or (self is WireView.Y)
+
+    def to_suffix(self) -> str:
+        return f"_plane{self.value}"
+
+    @staticmethod
+    def from_suffix(string: str, sep="_") -> "WireView":
+        match string.split(sep):
+            case [*_, "plane0"]:
+                return WireView.U
+            case [*_, "plane1"]:
+                return WireView.V
+            case [*_, "plane2"]:
+                return WireView.Y
+            case _:
+                raise ValueError("could not match to wire plane")
 
 
 def _save_plot(config: Config, fig: Figure, title: str):
