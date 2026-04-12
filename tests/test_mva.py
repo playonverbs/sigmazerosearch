@@ -7,6 +7,8 @@ from sigmazerosearch import defaults, mva, selection, truth, utils
 
 @pytest.fixture
 def Selection_array():
+    branches_subset = [b for b in defaults.config_no_bdt.branch_list if "ct" not in b]
+
     pset = selection.ParameterSet(
         pid_cut=0.6,
         min_length=10,
@@ -23,8 +25,7 @@ def Selection_array():
             iterate=True,
             iterate_step="50MB",
             branch_list=(
-                defaults.config_no_bdt.branch_list
-                + ["pfp_x", "pfp_y", "pfp_z", "mc_mode"]  # type: ignore
+                branches_subset + ["pfp_x", "pfp_y", "pfp_z", "mc_mode"]  # type: ignore
             ),
         ),
         cuts=[
@@ -46,9 +47,13 @@ def Selection_array():
         params=pset,
         label="bdt_prepare",
     )
+
     sel.open_files()
 
-    return sel.apply_cut(sel.cuts, accumulate=True)
+    arr = sel.apply_cut(sel.cuts, accumulate=True)
+    sel.close_files()
+
+    return arr
 
 
 @pytest.fixture
@@ -78,21 +83,22 @@ def make_MVAHandler(Selection_array):
 
 
 def test_MVAHandler(make_MVAHandler, tmp_path):
-    print(make_MVAHandler)
-
     for field in make_MVAHandler.extra_fields.keys():
         assert field in ak.fields(make_MVAHandler.data), f"{field} not found in array"
 
     output_path = tmp_path / "test.root"
 
-    make_MVAHandler.save_bdt_trees(output_path)
+    s, b = make_MVAHandler.save_bdt_trees(output_path)
 
     fd = up.open(output_path)
 
     signal_key, background_key = (
         f"{make_MVAHandler.mva_method}/SignalTree",
-        f"{make_MVAHandler.mva_method}/SignalTree",
+        f"{make_MVAHandler.mva_method}/BackgroundTree",
     )
 
-    _ = fd.get(signal_key)
-    _ = fd.get(background_key)
+    signal_tree = fd.get(signal_key)
+    background_tree = fd.get(background_key)
+
+    assert s == signal_tree.num_entries
+    assert b == background_tree.num_entries

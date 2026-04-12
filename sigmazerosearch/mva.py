@@ -41,6 +41,11 @@ class MVAHandler:
     """Additional fields to be computed using and added to `data`."""
     mva_method: str = "bdt"
     """MVA method string, used as a TDirectory name inside the output file"""
+    flatten: bool = False
+    """
+    Flag to flatten arrays if picking variables at an axis deeper than 0. e.g.
+    per-PFP variables
+    """
 
     def __post_init__(self):
         for k, func in self.extra_fields.items():
@@ -58,17 +63,20 @@ class MVAHandler:
             )
         )
 
-        for k, v in d.items():
-            d[k] = ak.flatten(v)
+        if self.flatten:
+            for k, v in d.items():
+                d[k] = ak.flatten(v)
 
         return ak.zip(d)
 
-    def save_bdt_trees(self, output_path: Path):
+    def save_bdt_trees(self, output_path: Path) -> tuple[int, int]:
         """
         Restructure the input data and output a TFile with a TTree for signal
         entries and one for background entries.
 
-        :param Path output_path:
+        :param Path output_path: The file to output the tree to.
+
+        :return: A tuple counting `(signal_entries, background_entries)`.
         """
         signal_key = f"{self.mva_method}/SignalTree"
         background_key = f"{self.mva_method}/BackgroundTree"
@@ -78,12 +86,24 @@ class MVAHandler:
 
         logger.info(f"writing trees to {output_path}")
 
-        bdt_dir[signal_key] = output[self.signal_condition(output)]
-        bdt_dir[background_key] = output[self.background_condition(output)]
+        # apply signal and background to preconditioned original data array to
+        # allow the use of all included fields, and keeping dimensions correct.
+        bdt_dir[signal_key] = output[
+            self.signal_condition(self.data[self.precondition(self.data)])
+            if self.precondition is not None
+            else self.signal_condition(self.data)
+        ]
+        bdt_dir[background_key] = output[
+            self.background_condition(self.data[self.precondition(self.data)])
+            if self.precondition is not None
+            else self.background_condition(self.data)
+        ]
 
         logger.info(
             f"Saved {bdt_dir[signal_key].num_entries} Signal entries and {bdt_dir[background_key].num_entries} Background entries"  # type: ignore
         )
+
+        return bdt_dir[signal_key].num_entries, bdt_dir[background_key].num_entries
 
 
 def precond_has_pfps(array: ak.Array):
