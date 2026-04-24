@@ -88,16 +88,23 @@ class MVAHandler:
 
         # apply signal and background to preconditioned original data array to
         # allow the use of all included fields, and keeping dimensions correct.
-        bdt_dir[signal_key] = output[
-            self.signal_condition(self.data[self.precondition(self.data)])
-            if self.precondition is not None
-            else self.signal_condition(self.data)
-        ]
-        bdt_dir[background_key] = output[
-            self.background_condition(self.data[self.precondition(self.data)])
-            if self.precondition is not None
-            else self.background_condition(self.data)
-        ]
+        # FIXME: make this use correct dimensions when using `flatten=True`
+        bdt_dir.mktree(
+            signal_key,
+            output[
+                self.signal_condition(self.data[self.precondition(self.data)])
+                if self.precondition is not None
+                else self.signal_condition(self.data)
+            ],
+        )
+        bdt_dir.mktree(
+            background_key,
+            output[
+                self.background_condition(self.data[self.precondition(self.data)])
+                if self.precondition is not None
+                else self.background_condition(self.data)
+            ],
+        )
 
         logger.info(
             f"Saved {bdt_dir[signal_key].num_entries} Signal entries and {bdt_dir[background_key].num_entries} Background entries"  # type: ignore
