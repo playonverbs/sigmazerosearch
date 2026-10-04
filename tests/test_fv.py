@@ -45,3 +45,14 @@ def test_r_closest_wall(x, y, z, want):
     assert _len(fv.r_to_closest_wall(x, y, z)) == _len(
         want
     ), "input and output dimensions not consistent"
+
+
+def test_fv_with_padding():
+    padding = 3.0
+    _fv = (fv.FV_x, fv.FV_y, fv.FV_z)
+
+    padded = fv.fv_with_padding(_fv, padding)
+
+    for i in (0, 1, 2):
+        assert padded[i][0] == _fv[i][0] + padding, "start padding does not match"
+        assert padded[i][1] == _fv[i][1] - padding, "end padding does not match"

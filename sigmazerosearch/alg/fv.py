@@ -14,6 +14,7 @@ TPC_CENTER = (126.625, 0.97, 518.5)
 TPC_SIDE_LENGTHS = (236.35, 233.0, 1036.8)
 
 Sides = tuple[float, float]
+Fv = tuple[Sides, Sides, Sides]
 
 FV_x: Sides = (0.0, 256.35)
 FV_y: Sides = (-115.53, 117.47)
@@ -76,3 +77,10 @@ def r_to_closest_wall(x, y, z):
         ),
         axis=0,
     )
+
+
+def fv_with_padding(sides: Fv, padding: float) -> Fv:
+    """
+    Provides a new set of side boundaries given a fiducial volume and a padding.
+    """
+    return tuple([(side[0] + padding, side[1] - padding) for side in sides])
