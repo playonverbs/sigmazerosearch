@@ -2,14 +2,16 @@
 Selection contains the main objects for handling the physics selection.
 """
 
+import gc
 import inspect
 import logging
 import pathlib
-from collections.abc import Iterable
+import pickle
+from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass, field
 from enum import Enum, IntEnum, auto
 from os.path import isabs
-from typing import Callable, Literal, Optional
+from typing import Literal, Optional
 
 import awkward as ak
 import matplotlib.pyplot as plt
@@ -18,9 +20,8 @@ import uproot as up
 from tabulate import tabulate
 from uproot.behaviors.TBranch import HasBranches
 
-import sigmazerosearch.alg.fv as fv
-import sigmazerosearch.utils as utils
-from sigmazerosearch import loader
+from sigmazerosearch import loader, utils
+from sigmazerosearch.alg import fv
 from sigmazerosearch.general import PDG, Config
 from sigmazerosearch.truth import GenEventType, GenType
 
@@ -125,8 +126,45 @@ class EventCategory(EventCategoryMixin, Enum):
 
 
 def signal_def(arr: ak.Array) -> ak.Array:
-    """Takes an <inv:#ak.Array> with fields corresponding to ntuple branches,
-    applies a mask and returns a boolean array"""
+    """
+    Takes an <inv:#ak.Array> with fields corresponding to ntuple branches and
+    applies a mask based on the signal definition for $\\Sigma^0$ production.
+    """
+    return np.logical_and.reduce(
+        (
+            np.logical_or(
+                arr["mc_mode"] == GenEventType.QEL.name,
+                arr["mc_mode"] == GenEventType.HYP.name,
+            ),
+            arr["mc_nu_pdg"] == PDG.NuMu.anti,
+            arr["mc_hyperon_pdg"] == PDG.Sigma0.value,
+            fv.in_active_tpc(
+                arr["mc_nu_pos_x"], arr["mc_nu_pos_y"], arr["mc_nu_pos_z"]
+            ),
+            ak.sum(arr["mc_decay_pdg"] == PDG.Proton.value, axis=1) >= 1,
+            ak.sum(arr["mc_decay_pdg"] == PDG.Pi.anti, axis=1) >= 1,
+            ak.sum(
+                arr["mc_decay_mom"][arr["mc_decay_pdg"] == PDG.Proton.value]
+                >= 0.3,  # proton momentum >= 300 MeV
+                axis=1,
+            )
+            >= 1,
+            ak.sum(
+                arr["mc_decay_mom"][arr["mc_decay_pdg"] == PDG.Pi.anti]
+                >= 0.1,  # pion momentum >= 100 MeV
+                axis=1,
+            )
+            >= 1,
+        )
+    )  # type: ignore
+
+
+def signal_def_no_thresholds(arr: ak.Array) -> ak.Array:
+    """
+    Takes an <inv:#ak.Array> with fields corresponding to ntuple branches and
+    applies a mask based on the signal definition for $\\Sigma^0$ production
+    without momentum thresholds on final state particles.
+    """
     return np.logical_and.reduce(
         (
             np.logical_or(
@@ -197,6 +235,14 @@ class Cut:
         self.n_background[0] += scale * ak.sum(~signal_def(arr[cond]), axis=None)
         self.n_passing[0] += scale * ak.sum(cond, axis=None)
 
+    def __getstate__(self) -> object:
+        state = self.__dict__.copy()
+
+        if "cutfunc" in state.keys():
+            del state["cutfunc"]
+
+        return state
+
     def save_state(self) -> dict:
         """
         :::{seealso}
@@ -237,7 +283,7 @@ class Cut:
         return f"<Cut name={self.name} passing={self.n_passing} signal={self.n_signal} background={self.n_background}>"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=False, slots=True)
 class ParameterSet:
     """
     Wraps all selection parameter values.
@@ -344,6 +390,14 @@ class Sample:
             "is_data": self.is_data,
             "gen_type": self.gen_type.name,
         }
+
+    def __getstate__(self) -> object:
+        state = self.__dict__.copy()
+
+        if "df" in state.keys():
+            del state["df"]
+
+        return state
 
     def _validate_(self) -> bool:
         if self.POT < 0:
@@ -473,6 +527,8 @@ class Selection:
                                     )  # NuMI dirt weighting
 
                             accum = ak.concatenate((accum, filter_arr), axis=0)
+                del s  # XXX: check if this really liberates memory
+                gc.collect()
             else:
                 raise TypeError(f"sample {s.file_name} has not been loaded")
 
@@ -761,6 +817,25 @@ class Selection:
                 )
         else:
             print_table(format)
+
+    def save_pkl(self, arr: ak.Array, filename: str | pathlib.Path):
+        """Simple pickle dump of the current object and an event array"""
+        with open(filename, "wb") as fd:
+            pickle.dump(
+                (self, arr),
+                fd,
+            )
+
+        logger.info("saved pkl file to %s", filename)
+
+    @staticmethod
+    def load_pkl(filename: str | pathlib.Path) -> tuple["Selection", ak.Array]:
+        """Read a simple pickle dump of a Selection"""
+
+        logger.info("loading pkl file from %s", filename)
+
+        with open(filename, "rb") as fd:
+            return pickle.load(fd)
 
     @staticmethod
     def load_state(filename: str | pathlib.Path):
